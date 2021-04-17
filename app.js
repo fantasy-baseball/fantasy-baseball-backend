@@ -7,6 +7,7 @@ const logger = require("morgan");
 const cors = require("cors");
 
 const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(cookieParser());
 app.use(cors());
 
 app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
