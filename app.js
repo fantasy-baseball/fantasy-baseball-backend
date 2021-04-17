@@ -15,7 +15,10 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  credentials: true,
+  origin: "http://localhost:3000",
+}));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
