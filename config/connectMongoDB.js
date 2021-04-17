@@ -7,6 +7,7 @@ const connectMongoDB = () => {
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
+      dbName: "fantasy-baseball",
     });
 
   const db = mongoose.connection;
