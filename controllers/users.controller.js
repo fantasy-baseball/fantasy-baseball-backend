@@ -1,4 +1,5 @@
 const { OAuth2Client } = require("google-auth-library");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 exports.login = async (req, res, next) => {
@@ -22,6 +23,14 @@ exports.login = async (req, res, next) => {
         image_url: picture,
       });
     }
+
+    const token = jwt.sign({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    }, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
   } catch (err) {
     next(err);
   }
