@@ -47,3 +47,7 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.logout = (req, res, next) => {
+
+};
