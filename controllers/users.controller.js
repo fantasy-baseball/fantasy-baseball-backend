@@ -12,7 +12,16 @@ exports.login = async (req, res, next) => {
 
     const { name, email, picture } = ticket.getPayload();
 
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        money: 5000,
+        image_url: picture,
+      });
+    }
   } catch (err) {
     next(err);
   }
