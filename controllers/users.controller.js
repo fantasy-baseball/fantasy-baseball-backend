@@ -1,4 +1,5 @@
 const { OAuth2Client } = require("google-auth-library");
+const User = require("../models/User");
 
 exports.login = async (req, res, next) => {
   try {
@@ -10,6 +11,8 @@ exports.login = async (req, res, next) => {
     });
 
     const { name, email, picture } = ticket.getPayload();
+
+    const user = await User.findOne({ email });
   } catch (err) {
     next(err);
   }
