@@ -6,5 +6,13 @@ module.exports = {
   },
   rules: {
     quotes: ["error", "double"],
+    "comma-dangle": [
+      "error",
+      {
+        arrays: "only-multiline",
+        objects: "only-multiline",
+        functions: "never",
+      },
+    ],
   },
 };
