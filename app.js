@@ -9,6 +9,10 @@ const cors = require("cors");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 
+const connectMongoDB = require("./config/connectMongoDB");
+
+connectMongoDB();
+
 const app = express();
 
 app.use(logger("dev"));
