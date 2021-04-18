@@ -33,6 +33,16 @@ exports.login = async (req, res, next) => {
     });
 
     res.cookie("@token", token);
+
+    res.status(200).json({
+      result: "ok",
+      data: {
+        name: user.name,
+        email: user.email,
+        money: user.money,
+        imageUrl: user.image_url,
+      },
+    });
   } catch (err) {
     next(err);
   }
