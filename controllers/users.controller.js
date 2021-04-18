@@ -31,6 +31,8 @@ exports.login = async (req, res, next) => {
     }, process.env.SECRET_KEY, {
       expiresIn: "7d",
     });
+
+    res.cookie("@token", token);
   } catch (err) {
     next(err);
   }
