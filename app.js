@@ -1,9 +1,15 @@
+require("dotenv").config();
+
 const createError = require("http-errors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
 const indexRouter = require("./routes/index");
+
+const connectMongoDB = require("./config/connectMongoDB");
+
+connectMongoDB();
 
 const app = express();
 
