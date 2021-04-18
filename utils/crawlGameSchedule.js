@@ -4,7 +4,7 @@ const crawlGameSchedule = async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.goto("https://www.koreabaseball.com/Schedule/GameCenter/Main.aspx#none;");
+  await page.goto("https://www.koreabaseball.com/Schedule/GameCenter/Main.aspx#none");
 
   const nextGameDate = await page.evaluate(() => (
     document.querySelector(".date-txt").textContent
@@ -12,8 +12,8 @@ const crawlGameSchedule = async () => {
 
   const gameSchedule = await page.evaluate(() => {
     const $gameList = document.querySelectorAll(".game-list > li");
-
     const result = [];
+
     for (let i = 0; i < $gameList.length; i += 1) {
       const $game = $gameList[i];
       const time = $game.querySelector(".time").textContent;
