@@ -39,7 +39,7 @@ const crawlGameSchedule = async (dateNumber) => {
 
   const gameListResponse = await page.evaluate(async (date) => {
     try {
-      const result = await $.ajax({
+      const response = await $.ajax({
         type: "post",
         url: "/ws/Main.asmx/GetKboGameList",
         dataType: "json",
@@ -52,19 +52,18 @@ const crawlGameSchedule = async (dateNumber) => {
 
       return {
         result: true,
-        data: result.game,
+        data: response.game,
       };
     } catch (err) {
       return {
         result: false,
-        errorLocation: "getGameSchedule",
         message: err.responseText,
       };
     }
   }, dateNumber);
 
   if (!gameListResponse.result) {
-    return gameListResponse;
+    throw new Error(gameListResponse.message);
   }
 
   const gameList = gameListResponse.data.map((game) => ({
@@ -83,10 +82,7 @@ const crawlGameSchedule = async (dateNumber) => {
 
   await browser.close();
 
-  return {
-    result: true,
-    data: gameList,
-  };
+  return gameList;
 };
 
 module.exports = crawlGameSchedule;
