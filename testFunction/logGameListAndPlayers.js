@@ -17,4 +17,4 @@ const crawlPlayersInfo = require("../utils/crawlPlayersInfo");
   }
 })();
 
-// test: node testTrigger/logGameListAndPlayers.js
+// test: node testFunction/logGameListAndPlayers.js
