@@ -8,8 +8,20 @@ const gameSchema = new mongoose.Schema({
   user_play_data: [{ type: mongoose.Schema.Types.ObjectId }],
   players: [{ type: mongoose.Schema.Types.ObjectId }],
   schedule: [{
-    id: {
+    gameId: {
       type: String,
+      required: true,
+    },
+    leagueId: {
+      type: Number,
+      required: true,
+    },
+    seriesId: {
+      type: Number,
+      required: true,
+    },
+    seasonId: {
+      type: Number,
       required: true,
     },
     date: {
