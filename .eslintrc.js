@@ -6,5 +6,7 @@ module.exports = {
   },
   rules: {
     quotes: ["error", "double"],
+    "no-underscore-dangle": "off",
+    "no-unused-vars": "warn",
   },
 };
