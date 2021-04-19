@@ -56,6 +56,7 @@ const getPlayersFromEntry = (entry, isHomeTeam, games) => {
       team: teamName,
       name: teamEntry[j].row[2].Text,
       position: teamEntry[j].row[1].Text,
+      playerType: "hitter",
     });
   }
 
@@ -63,6 +64,7 @@ const getPlayersFromEntry = (entry, isHomeTeam, games) => {
     team: teamName,
     name: pitcher,
     position: "투수",
+    playerType: "pitcher",
   });
 
   return result;
