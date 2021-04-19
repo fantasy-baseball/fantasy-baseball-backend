@@ -1,17 +1,9 @@
-const { OAuth2Client } = require("google-auth-library");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 exports.login = async (req, res, next) => {
   try {
-    const googleToken = req.headers.authorization.split(" ")[1];
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-    const ticket = await client.verifyIdToken({
-      idToken: googleToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const { name, email, picture } = ticket.getPayload();
+    const { googleToken, profile } = res.locals;
+    const { name, email, picture } = profile;
 
     let user = await User.findOne({ email });
 
@@ -32,7 +24,7 @@ exports.login = async (req, res, next) => {
       expiresIn: "7d",
     });
 
-    res.cookie("@token", token);
+    res.cookie("token", token);
 
     res.status(200).json({
       result: "ok",
@@ -49,6 +41,6 @@ exports.login = async (req, res, next) => {
 };
 
 exports.logout = (req, res, next) => {
-  res.clearCookie("@token");
+  res.clearCookie("token");
   res.status(200).json({ result: "ok" });
 };
