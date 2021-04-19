@@ -63,7 +63,7 @@ const crawlPlayersInfo = async (players) => {
     const kboId = collectedLink.replace(/.*playerId=/, "");
 
     newPlayers[i].link = collectedLink;
-    newPlayers[i].id = kboId;
+    newPlayers[i].kboId = kboId;
 
     playerInfoPage.push(page.goto(collectedLink));
   }
