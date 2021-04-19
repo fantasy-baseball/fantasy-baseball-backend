@@ -16,15 +16,7 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const token = jwt.sign({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-    }, process.env.SECRET_KEY, {
-      expiresIn: "7d",
-    });
-
-    res.cookie("token", token);
+    res.cookie("token", googleToken);
 
     res.status(200).json({
       result: "ok",
