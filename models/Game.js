@@ -5,7 +5,7 @@ const gameSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  user_play_data: [{
+  userPlayData: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
@@ -59,9 +59,9 @@ const gameSchema = new mongoose.Schema({
       trim: true,
     },
   }],
-  total_money: Number,
-  total_score: Number,
-  is_opened: Boolean,
+  totalMoney: Number,
+  totalScore: Number,
+  isOpened: Boolean,
 });
 
 module.exports = mongoose.model("Game", gameSchema);
