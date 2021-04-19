@@ -5,8 +5,14 @@ const gameSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  user_play_data: [{ type: mongoose.Schema.Types.ObjectId }],
-  players: [{ type: mongoose.Schema.Types.ObjectId }],
+  user_play_data: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }],
+  players: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Player",
+  }],
   schedule: [{
     gameId: {
       type: String,
@@ -44,8 +50,14 @@ const gameSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    homePitcher: String,
-    awayPitcher: String,
+    homePitcher: {
+      type: String,
+      trim: true,
+    },
+    awayPitcher: {
+      type: String,
+      trim: true,
+    },
   }],
   total_money: Number,
   total_score: Number,
