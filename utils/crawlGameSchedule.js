@@ -1,53 +1,91 @@
-const puppeteer = require("puppeteer");
+/**
+ * Get game schedule from KBO game center.
+ *
+ * @params {nunber|string} [dateNumber]
+ * - The DateNumber(yyyymmdd) of the game you want to get.
+ * @returns {Object}
+ * -{
+ *    result: boolean,
+ *    data: [
+ *      {
+ *        gameId: '20210417WOKT0',
+ *        leagueId: 1,
+ *        seriesId: 0,
+ *        seasonId: 2021,
+ *        date: '20210417',
+ *        time: '17:00',
+ *        stadium: '수원',
+ *        home: 'KT',
+ *        away: '키움',
+ *        homePitcher: '데스파이네 ',
+ *        awayPitcher: '안우진 '
+ *      },
+ *      ...
+ *   ],
+ * }
+ *
+ * example:
+ * const gameList = await crawlGameSchedule(20210416);
+ */
 
-const crawlGameSchedule = async () => {
+const puppeteer = require("puppeteer");
+const { KBO_GAME_CENTER_URL } = require("../constants/crawling");
+
+const crawlGameSchedule = async (dateNumber) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.goto("https://www.koreabaseball.com/Schedule/GameCenter/Main.aspx#none");
+  await page.goto(KBO_GAME_CENTER_URL);
 
-  const nextGameDate = await page.evaluate(() => (
-    document.querySelector(".date-txt").textContent
-  ));
-
-  const gameSchedule = await page.evaluate(() => {
-    const $gameList = document.querySelectorAll(".game-list > li");
-    const result = [];
-
-    for (let i = 0; i < $gameList.length; i += 1) {
-      const $game = $gameList[i];
-      const time = $game.querySelector(".time").textContent;
-      const $homePitcher = $game.querySelector(".home .pitcher");
-      const $awayPitcher = $game.querySelector(".away .pitcher");
-
-      const {
-        home_nm: { value: home },
-        away_nm: { value: away },
-        s_nm: { value: stadium },
-        g_id: { value: id },
-        g_dt: { value: date },
-      } = $game.attributes;
-
-      result.push({
-        id,
-        date,
-        time,
-        stadium,
-        home,
-        away,
-        homePitcher: $homePitcher ? $homePitcher.textContent.trim() : null,
-        awayPitcher: $awayPitcher ? $awayPitcher.textContent.trim() : null,
+  const gameListResponse = await page.evaluate(async (date) => {
+    try {
+      const result = await $.ajax({
+        type: "post",
+        url: "/ws/Main.asmx/GetKboGameList",
+        dataType: "json",
+        data: {
+          leId: "1",
+          srId: "0,1,3,4,5,7,8,9",
+          date,
+        },
       });
-    }
 
-    return result;
-  });
+      return {
+        result: true,
+        data: result.game,
+      };
+    } catch (err) {
+      return {
+        result: false,
+        errorLocation: "getGameSchedule",
+        message: err.responseText,
+      };
+    }
+  }, dateNumber);
+
+  if (!gameListResponse.result) {
+    return gameListResponse;
+  }
+
+  const gameList = gameListResponse.data.map((game) => ({
+    gameId: game.G_ID,
+    leagueId: game.LE_ID,
+    seriesId: game.SR_ID,
+    seasonId: game.SEASON_ID,
+    date: game.G_DT,
+    time: game.G_TM,
+    stadium: game.S_NM,
+    home: game.HOME_NM,
+    away: game.AWAY_NM,
+    homePitcher: game.B_PIT_P_NM.trim(),
+    awayPitcher: game.T_PIT_P_NM.trim(),
+  }));
 
   await browser.close();
 
   return {
-    nextGameDate,
-    gameSchedule,
+    result: true,
+    data: gameList,
   };
 };
 
