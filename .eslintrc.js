@@ -14,6 +14,9 @@ module.exports = {
         functions: "never",
       },
     ],
+    "no-underscore-dangle": [
+      "warn",
+    ],
   },
   globals: {
     $: false,
