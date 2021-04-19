@@ -38,6 +38,36 @@
 const puppeteer = require("puppeteer");
 const { KBO_GAME_CENTER_URL } = require("../constants/crawling");
 
+const getPlayersFromEntry = (entry, isHomeTeam, games) => {
+  const result = [];
+
+  const teamIndex = isHomeTeam ? 3 : 4;
+  const teamEntry = JSON.parse(entry[teamIndex][0]).rows;
+  const teamName = entry[teamIndex - 2][0].T_NM;
+
+  const pitcherKey = isHomeTeam ? "homePitcher" : "awayPitcher";
+  const pitcher = games.find((game) => {
+    const homeAway = isHomeTeam ? "home" : "away";
+    return game[homeAway] === teamName;
+  })[pitcherKey];
+
+  for (let j = 0; j < teamEntry.length; j += 1) {
+    result.push({
+      team: teamName,
+      name: teamEntry[j].row[2].Text,
+      position: teamEntry[j].row[1].Text,
+    });
+  }
+
+  result.push({
+    team: teamName,
+    name: pitcher,
+    position: "투수",
+  });
+
+  return result;
+};
+
 const crawlPlayerEntry = async (gameList) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -78,70 +108,29 @@ const crawlPlayerEntry = async (gameList) => {
     } catch (err) {
       return {
         result: false,
-        errorLocation: "getEntry",
         message: err.responseText,
       };
     }
   }, gameList);
 
   if (!entryResponse.result) {
-    return entryResponse;
+    throw new Error(entryResponse.message);
   }
 
-  const entryList = await page.evaluate(async ({ data: entryRes }, games) => {
-    const result = [];
+  const players = [];
+  for (let i = 0; i < entryResponse.data.length; i += 1) {
+    const entry = entryResponse.data[i];
 
-    for (let i = 0; i < entryRes.length; i += 1) {
-      const entry = entryRes[i];
-
-      const homeTeam = entry[1][0].T_NM;
-      const awayTeam = entry[2][0].T_NM;
-
-      if (entry[0][0].LINEUP_CK) {
-        const homeTeamEntry = JSON.parse(entry[3][0]).rows;
-        const awayTeamEntry = JSON.parse(entry[4][0]).rows;
-
-        for (let j = 0; j < homeTeamEntry.length; j += 1) {
-          result.push({
-            team: homeTeam,
-            name: homeTeamEntry[j].row[2].Text,
-            position: homeTeamEntry[j].row[1].Text,
-          });
-        }
-
-        const { homePitcher } = games.find((game) => game.home === homeTeam);
-        result.push({
-          team: homeTeam,
-          name: homePitcher,
-          position: "투수",
-        });
-
-        for (let j = 0; j < awayTeamEntry.length; j += 1) {
-          result.push({
-            team: awayTeam,
-            name: awayTeamEntry[j].row[2].Text,
-            position: awayTeamEntry[j].row[1].Text,
-          });
-        }
-
-        const { awayPitcher } = games.find((game) => game.home === homeTeam);
-        result.push({
-          team: awayTeam,
-          name: awayPitcher,
-          position: "투수",
-        });
-      }
+    if (entry[0][0].LINEUP_CK) {
+      const homeTeamPlayers = getPlayersFromEntry(entry, true, gameList);
+      const awayTeamPlayers = getPlayersFromEntry(entry, false, gameList);
+      players.push(...homeTeamPlayers, ...awayTeamPlayers);
     }
-
-    return result;
-  }, entryResponse, gameList);
+  }
 
   await browser.close();
 
-  return {
-    result: true,
-    data: entryList,
-  };
+  return players;
 };
 
 module.exports = crawlPlayerEntry;
