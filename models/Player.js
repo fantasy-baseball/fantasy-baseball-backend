@@ -11,10 +11,10 @@ const playerSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  back_number: {
+  backNumber: {
     type: Number,
   },
-  player_type: {
+  playerType: {
     type: String,
     enum: ["hitter", "pitcher"],
     required: true,
@@ -28,15 +28,25 @@ const playerSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  player_photo_url: {
+  playerPhotoUrl: {
     type: String,
     trim: true,
   },
   link: {
     type: String,
   },
-  kbo_id: String,
-  statistic_data: Array,
+  kboId: String,
+  statistics: [{
+    record: Array,
+    totalScore: Number,
+    playerMoney: Number,
+    users: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
+    scorePercentage: Number,
+    date: Date,
+  }],
 });
 
 module.exports = mongoose.model("Player", playerSchema);
