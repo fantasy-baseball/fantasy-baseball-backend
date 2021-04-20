@@ -4,7 +4,7 @@
  * @params {Object[]}
  * - The games that have gameId, seasonId, leagueId, and seriesId.
  * @returns {Object}
- * -{
+ * - {
  *    result: boolean,
  *    data: [
  *       {
@@ -19,17 +19,17 @@
  * example:
  * const entry = await crawlPlayerEntry([
  *   {
- *     gameId: '20210417WOKT0',
+ *     gameId: "20210417WOKT0",
  *     leagueId: 1,
  *     seriesId: 0,
  *     seasonId: 2021,
- *     date: '20210417',
- *     time: '17:00',
- *     stadium: '수원',
- *     home: 'KT',
- *     away: '키움',
- *     homePitcher: '데스파이네 ',
- *     awayPitcher: '안우진 '
+ *     date: "20210417",
+ *     time: "17:00",
+ *     stadium: "수원",
+ *     home: "KT",
+ *     away: "키움",
+ *     homePitcher: "데스파이네 ",
+ *     awayPitcher: "안우진 "
  *   },
  *   ...
  * ]);

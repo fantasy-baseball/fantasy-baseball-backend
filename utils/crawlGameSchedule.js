@@ -1,24 +1,24 @@
 /**
  * Get game schedule from KBO game center.
  *
- * @params {nunber|string} [dateNumber]
+ * @params {number|string} [dateNumber]
  * - The DateNumber(yyyymmdd) of the game you want to get.
  * @returns {Object}
- * -{
+ * - {
  *    result: boolean,
  *    data: [
  *      {
- *        gameId: '20210417WOKT0',
+ *        gameId: "20210417WOKT0",
  *        leagueId: 1,
  *        seriesId: 0,
  *        seasonId: 2021,
- *        date: '20210417',
- *        time: '17:00',
- *        stadium: '수원',
- *        home: 'KT',
- *        away: '키움',
- *        homePitcher: '데스파이네 ',
- *        awayPitcher: '안우진 '
+ *        date: "20210417",
+ *        time: "17:00",
+ *        stadium: "수원",
+ *        home: "KT",
+ *        away: "키움",
+ *        homePitcher: "데스파이네 ",
+ *        awayPitcher: "안우진 "
  *      },
  *      ...
  *   ],
