@@ -6,8 +6,8 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors");
 
-const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const gameRouter = require("./routes/games");
 
 const connectMongoDB = require("./config/connectMongoDB");
 
@@ -24,8 +24,8 @@ app.use(cors({
   origin: "http://localhost:3000",
 }));
 
-app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/games", gameRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
