@@ -2,31 +2,31 @@ const puppeteer = require("puppeteer");
 const { KBO_PLAYER_SEARCH_URL } = require("../constants/crawling");
 
 const crawlPlayersInfo = async (players) => {
-  const newPlayers = [];
+  const result = [];
   for (let i = 0; i < players.length; i += 1) {
-    newPlayers.push({ ...players[i] });
+    result.push({ ...players[i] });
   }
 
   const browser = await puppeteer.launch();
 
-  const pages = [];
+  let pages = [];
   for (let i = 0; i < players.length; i += 1) {
     pages.push(browser.newPage());
   }
 
-  const createdPages = await Promise.all(pages);
+  pages = await Promise.all(pages);
 
   const searchPages = [];
   for (let i = 0; i < players.length; i += 1) {
-    const page = createdPages[i];
+    const page = pages[i];
     searchPages.push(page.goto(KBO_PLAYER_SEARCH_URL + players[i].name));
   }
 
   await Promise.all(searchPages);
 
-  const links = [];
+  let links = [];
   for (let i = 0; i < players.length; i += 1) {
-    const searchCompletePage = createdPages[i];
+    const searchCompletePage = pages[i];
     const currentPlayer = players[i];
 
     links.push(searchCompletePage.evaluate((toBeMatchedPlayer) => {
@@ -54,25 +54,25 @@ const crawlPlayersInfo = async (players) => {
     }, currentPlayer));
   }
 
-  const collectedLinks = await Promise.all(links);
+  links = await Promise.all(links);
 
   const playerInfoPage = [];
   for (let i = 0; i < players.length; i += 1) {
-    const page = createdPages[i];
-    const collectedLink = collectedLinks[i];
+    const page = pages[i];
+    const collectedLink = links[i];
     const kboId = collectedLink.replace(/.*playerId=/, "");
 
-    newPlayers[i].link = collectedLink;
-    newPlayers[i].kboId = kboId;
+    result[i].link = collectedLink;
+    result[i].kboId = kboId;
 
     playerInfoPage.push(page.goto(collectedLink));
   }
 
   await Promise.all(playerInfoPage);
 
-  const playerInfos = [];
+  let playerInfos = [];
   for (let i = 0; i < players.length; i += 1) {
-    const page = createdPages[i];
+    const page = pages[i];
 
     playerInfos.push(page.evaluate(() => {
       const playerPhotoUrl = document.querySelector(
@@ -91,23 +91,23 @@ const crawlPlayersInfo = async (players) => {
     }));
   }
 
-  const collectedPlayerInfos = await Promise.all(playerInfos);
+  playerInfos = await Promise.all(playerInfos);
 
   for (let i = 0; i < players.length; i += 1) {
     const {
       playerPhotoUrl,
       backNumber,
       role,
-    } = collectedPlayerInfos[i];
+    } = playerInfos[i];
 
-    newPlayers[i].playerPhotoUrl = playerPhotoUrl;
-    newPlayers[i].backNumber = backNumber;
-    newPlayers[i].role = role;
+    result[i].playerPhotoUrl = playerPhotoUrl;
+    result[i].backNumber = backNumber;
+    result[i].role = role;
   }
 
   await browser.close();
 
-  return newPlayers;
+  return result;
 };
 
 module.exports = crawlPlayersInfo;
