@@ -6,7 +6,7 @@ const Player = require("../models/Player");
 
 module.exports = async (dateNumber) => {
   let dateString = dateNumber;
-  if (typeof date !== "string") {
+  if (typeof dateString !== "string") {
     dateString = dateNumber.toString();
   }
 
@@ -39,11 +39,11 @@ module.exports = async (dateNumber) => {
 
     const year = Number(dateString.slice(0, 4));
     const month = Number(dateString.slice(4, 6)) - 1;
-    const day = Number(dateString.slice(6, 8));
-    const date = new Date(year, month, day, 4, 0);
+    const date = Number(dateString.slice(6, 8));
+    const gameDate = new Date(year, month, date, 4, 0);
 
     const newGame = new Game({
-      date,
+      date: gameDate,
       players: playersId,
       schedule: gameList,
     });
