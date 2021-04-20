@@ -7,10 +7,11 @@ exports.getSchedule = async (req, res, next) => {
     const game = await Game.findOne({ gameDate }).lean();
 
     if (!game) {
-      return next(createError(
+      next(createError(
         404,
         "Can't find Game that corresponds to the game_date"
       ));
+      return;
     }
 
     res.status(200).json({
