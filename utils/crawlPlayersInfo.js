@@ -41,8 +41,8 @@ const crawlPlayersInfo = async (players) => {
 
         const isMatched = (
           backNumber !== "#"
-          && toBeMatchedPlayer.name === name
-          && toBeMatchedPlayer.team === team
+            && toBeMatchedPlayer.name === name
+            && toBeMatchedPlayer.team === team
         );
 
         if (isMatched) {
