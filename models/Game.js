@@ -5,11 +5,29 @@ const gameSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  user_play_data: [{ type: mongoose.Schema.Types.ObjectId }],
-  players: [{ type: mongoose.Schema.Types.ObjectId }],
+  userPlayData: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }],
+  players: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Player",
+  }],
   schedule: [{
-    id: {
+    gameId: {
       type: String,
+      required: true,
+    },
+    leagueId: {
+      type: Number,
+      required: true,
+    },
+    seriesId: {
+      type: Number,
+      required: true,
+    },
+    seasonId: {
+      type: Number,
       required: true,
     },
     date: {
@@ -32,12 +50,18 @@ const gameSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    homePitcher: String,
-    awayPitcher: String,
+    homePitcher: {
+      type: String,
+      trim: true,
+    },
+    awayPitcher: {
+      type: String,
+      trim: true,
+    },
   }],
-  total_money: Number,
-  total_score: Number,
-  is_opened: Boolean,
+  totalMoney: Number,
+  totalScore: Number,
+  isOpened: Boolean,
 });
 
 module.exports = mongoose.model("Game", gameSchema);
