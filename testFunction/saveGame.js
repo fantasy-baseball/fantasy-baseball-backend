@@ -40,15 +40,16 @@ module.exports = async (dateNumber) => {
     const year = Number(dateString.slice(0, 4));
     const month = Number(dateString.slice(4, 6)) - 1;
     const date = Number(dateString.slice(6, 8));
-    const gameDate = new Date(year, month, date, 4, 0);
+    const createdAt = new Date(year, month, date, 4, 0);
+    // scheduling simulation
+    // TODO: delete
 
-    const newGame = new Game({
-      date: gameDate,
+    await Game.create({
+      createdAt,
+      gameDate: dateString,
       players: playersId,
       schedule: gameList,
     });
-
-    await newGame.save();
   } catch (err) {
     console.log(err);
   }
