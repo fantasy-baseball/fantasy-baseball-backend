@@ -42,13 +42,11 @@ module.exports = async (dateNumber) => {
     const date = Number(dateString.slice(6, 8));
     const gameDate = new Date(year, month, date, 4, 0);
 
-    const newGame = new Game({
+    await Game.create({
       date: gameDate,
       players: playersId,
       schedule: gameList,
     });
-
-    await newGame.save();
   } catch (err) {
     console.log(err);
   }
