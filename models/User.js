@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  image_url: {
+  imageUrl: {
     type: String,
     required: true,
   },
