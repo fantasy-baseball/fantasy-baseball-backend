@@ -43,7 +43,6 @@ exports.logout = (req, res, next) => {
 };
 
 exports.checkUser = async (req, res, next) => {
-  console.log(res.locals.profile);
   try {
     const { email } = res.locals.profile;
     const user = await User.findOne({ email });
