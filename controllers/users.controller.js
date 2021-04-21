@@ -17,7 +17,7 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    res.cookie("token", googleToken);
+    res.cookie("access_token", googleToken);
 
     res.status(200).json({
       result: "ok",
@@ -34,6 +34,6 @@ exports.login = async (req, res, next) => {
 };
 
 exports.logout = (req, res, next) => {
-  res.clearCookie("token");
+  res.clearCookie("access_token");
   res.status(200).json({ result: "ok" });
 };
