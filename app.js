@@ -9,6 +9,8 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
+const authenticateUser = require("./middlewares/authenticateUser");
+
 const connectMongoDB = require("./config/connectMongoDB");
 
 connectMongoDB();
@@ -25,7 +27,7 @@ app.use(cors({
 }));
 
 app.use("/users", usersRouter);
-app.use("/games", gameRouter);
+app.use("/games", authenticateUser, gameRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
