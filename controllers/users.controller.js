@@ -1,3 +1,4 @@
+const createError = require("http-errors");
 const User = require("../models/User");
 
 exports.login = async (req, res, next) => {
@@ -28,7 +29,7 @@ exports.login = async (req, res, next) => {
       },
     });
   } catch (err) {
-    next(err);
+    next(createError(500, err.message));
   }
 };
 
