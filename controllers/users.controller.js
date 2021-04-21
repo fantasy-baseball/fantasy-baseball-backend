@@ -7,14 +7,17 @@ exports.login = async (req, res, next) => {
     const { name, email, picture } = profile;
 
     let user = await User.findOne({ email });
+    let isInitialLogin = false;
 
     if (!user) {
       user = await User.create({
         name,
         email,
         money: 5000,
-        image_url: picture,
+        imageUrl: picture,
       });
+
+      isInitialLogin = true;
     }
 
     res.cookie("access_token", googleToken);
@@ -27,6 +30,7 @@ exports.login = async (req, res, next) => {
         money: user.money,
         imageUrl: user.image_url,
       },
+      isInitialLogin,
     });
   } catch (err) {
     next(createError(500, err.message));
@@ -36,4 +40,24 @@ exports.login = async (req, res, next) => {
 exports.logout = (req, res, next) => {
   res.clearCookie("access_token");
   res.status(200).json({ result: "ok" });
+};
+
+exports.checkUser = async (req, res, next) => {
+  console.log(res.locals.profile);
+  try {
+    const { email } = res.locals.profile;
+    const user = await User.findOne({ email });
+
+    res.status(200).json({
+      result: "ok",
+      data: {
+        name: user.name,
+        email: user.email,
+        money: user.money,
+        imageUrl: user.image_url,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 };
