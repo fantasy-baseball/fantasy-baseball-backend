@@ -27,7 +27,7 @@ app.use(cors({
 }));
 
 app.use("/users", usersRouter);
-app.use("/games", authenticateUser, gameRouter);
+app.use("/games", gameRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
