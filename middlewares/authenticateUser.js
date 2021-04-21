@@ -15,6 +15,7 @@ const authenticateUser = async (req, res, next) => {
     res.locals.profile = { name, email, picture };
     next();
   } catch (err) {
+    res.clearCookie("access_token");
     res.status(401).json({
       result: "failure",
       message: "Unauthorized",
