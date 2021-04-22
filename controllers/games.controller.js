@@ -1,6 +1,9 @@
 const createError = require("http-errors");
 const Game = require("../models/Game");
+const Player = require("../models/Player");
 const Statistics = require("../models/Statistic");
+const User = require("../models/User");
+const UserBettingData = require("../models/UserBettingData");
 require("../models/Player");
 
 exports.getSchedule = async (req, res, next) => {
@@ -65,6 +68,60 @@ exports.getPlayers = async (req, res, next) => {
       result: "ok",
       data: players,
     });
+  } catch (err) {
+    next(createError(500, err.message));
+  }
+};
+
+exports.postBetting = async (req, res, next) => {
+  try {
+    const { email } = res.locals.profile;
+    const { date, roaster, bettingMoney } = req.body;
+
+    const roasterWithKboId = await Promise.all(
+      roaster.map((id) => Player.findOne({ kboId: id }, "_id"))
+    );
+    const roasterWithId = roasterWithKboId.map((object) => object._id);
+
+    const user = await User.findOne({ email });
+    const userBettingData = await UserBettingData.findOne({ user: user._id });
+
+    if (userBettingData) {
+      res.status(409).json({
+        result: "duplicate",
+        message: "Can't save user play data because data already exists",
+      });
+      return;
+    }
+
+    const bettingData = await UserBettingData.create({
+      user: user._id,
+      bettingMoney,
+      roaster: roasterWithId,
+    });
+
+    await Game.findOneAndUpdate(
+      { gameDate: date },
+      {
+        $push: {
+          userBettingData: bettingData,
+        },
+        $inc: {
+          totalMoney: bettingMoney,
+        },
+      }
+    );
+
+    await User.findOneAndUpdate(
+      { email },
+      {
+        $inc: {
+          money: -bettingMoney
+        },
+      }
+    );
+
+    res.status(201).json({ result: "ok" });
   } catch (err) {
     next(createError(500, err.message));
   }
