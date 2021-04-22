@@ -63,7 +63,7 @@ exports.getPlayers = async (req, res, next) => {
 
     res.status(200).json({
       result: "ok",
-      data: game.players,
+      data: players,
     });
   } catch (err) {
     next(createError(500, err.message));
