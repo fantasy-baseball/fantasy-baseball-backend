@@ -10,6 +10,15 @@ const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
 const authenticateUser = require("./middlewares/authenticateUser");
+const gameResult = require("./mock/gameResult");
+
+const { playersRecord } = gameResult[1];
+const awayHitter = playersRecord["한화"].hitters;
+const homeHitter = playersRecord.NC.hitters;
+const player = homeHitter["알테어"];
+const calculatePlayerScore = require("./utils/calculatePlayerScore");
+
+calculatePlayerScore(player);
 
 const connectMongoDB = require("./config/connectMongoDB");
 
