@@ -17,6 +17,7 @@ module.exports = {
     "no-underscore-dangle": "off",
     "no-unused-vars": "warn",
     "consistent-return": "off",
+    "no-continue": "off",
   },
   globals: {
     $: false,
