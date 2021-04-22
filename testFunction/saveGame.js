@@ -3,6 +3,7 @@ const crawlPlayerEntry = require("../utils/crawlPlayerEntry");
 const crawlPlayersInfo = require("../utils/crawlPlayersInfo");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
+const Statistic = require("../models/Statistic");
 
 module.exports = async (dateNumber) => {
   let dateString = dateNumber;
@@ -18,12 +19,30 @@ module.exports = async (dateNumber) => {
     const playersWithInfo = await crawlPlayersInfo(players);
     console.log("get playersInfo");
 
-    const newPlayers = [];
+    let newPlayers = [];
     for (let i = 0; i < playersWithInfo.length; i += 1) {
+      const {
+        team,
+        name,
+        link,
+        kboId,
+        playerPhotoUrl,
+        backNumber,
+        role,
+      } = playersWithInfo[i];
+
       newPlayers.push(
         Player.findOneAndUpdate(
           { kboId: playersWithInfo[i].kboId },
-          playersWithInfo[i],
+          {
+            team,
+            name,
+            link,
+            kboId,
+            playerPhotoUrl,
+            backNumber,
+            role,
+          },
           {
             new: true,
             upsert: true,
@@ -32,10 +51,55 @@ module.exports = async (dateNumber) => {
       );
     }
 
-    console.log("update Players");
+    newPlayers = await Promise.all(newPlayers);
+    const playersIds = newPlayers.map((player) => player._id);
 
-    const playersId = (await Promise.all(newPlayers))
-      .map((player) => player._id);
+    let newStatistics = [];
+    for (let i = 0; i < playersWithInfo.length; i += 1) {
+      const {
+        position,
+        playerType,
+      } = playersWithInfo[i];
+
+      newStatistics.push(Statistic.create({
+        playerType,
+        position,
+        gameDate: dateString,
+      }));
+    }
+
+    newStatistics = await Promise.all(newStatistics);
+    const statisticIds = newStatistics.map((statistics) => statistics._id);
+
+    const havingStatisticPlayers = [];
+    const havingPlayerStatistics = [];
+    for (let i = 0; i < newPlayers.length; i += 1) {
+      const newPlayer = newPlayers[i];
+      const newStatistic = newStatistics[i];
+      const playerId = playersIds[i];
+      const statisticsId = statisticIds[i];
+
+      havingStatisticPlayers.push(
+        newPlayer.updateOne(
+          {
+            $push: {
+              statistics: statisticsId,
+            }
+          }
+        )
+      );
+
+      havingPlayerStatistics.push(
+        newStatistic.updateOne(
+          { player: playerId }
+        )
+      );
+    }
+
+    await Promise.all(havingStatisticPlayers);
+    await Promise.all(havingPlayerStatistics);
+
+    console.log("update Players");
 
     const year = Number(dateString.slice(0, 4));
     const month = Number(dateString.slice(4, 6)) - 1;
@@ -47,9 +111,11 @@ module.exports = async (dateNumber) => {
     await Game.create({
       createdAt,
       gameDate: dateString,
-      players: playersId,
+      players: playersIds,
       schedule: gameList,
     });
+
+    console.log("update Game");
   } catch (err) {
     console.log(err);
   }
