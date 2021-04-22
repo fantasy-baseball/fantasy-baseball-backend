@@ -71,15 +71,15 @@ module.exports = async (dateNumber) => {
     newStatistics = await Promise.all(newStatistics);
     const statisticIds = newStatistics.map((statistics) => statistics._id);
 
-    const havingStatisticPlayers = [];
-    const havingPlayerStatistics = [];
+    const playersWithStatisticId = [];
+    const statisticsWithPlayerId = [];
     for (let i = 0; i < newPlayers.length; i += 1) {
       const newPlayer = newPlayers[i];
       const newStatistic = newStatistics[i];
       const playerId = playersIds[i];
       const statisticsId = statisticIds[i];
 
-      havingStatisticPlayers.push(
+      playersWithStatisticId.push(
         newPlayer.updateOne(
           {
             $push: {
@@ -89,15 +89,15 @@ module.exports = async (dateNumber) => {
         )
       );
 
-      havingPlayerStatistics.push(
+      statisticsWithPlayerId.push(
         newStatistic.updateOne(
           { player: playerId }
         )
       );
     }
 
-    await Promise.all(havingStatisticPlayers);
-    await Promise.all(havingPlayerStatistics);
+    await Promise.all(playersWithStatisticId);
+    await Promise.all(statisticsWithPlayerId);
 
     console.log("update Players");
 
