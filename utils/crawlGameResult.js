@@ -115,10 +115,6 @@ const crawlGameResults = async (gameIds) => {
   gameSummaries = await Promise.all(gameSummaries);
   const gameSummariesByPlayers = groupSummaryByPlayers(gameSummaries);
 
-  // TODO:
-  // 이름 키, 기록 밸류로 정리
-  // 타자, 투수 기록 가져오기
-
   let playersRecords = [];
   for (let i = 0; i < gameIds.length; i += 1) {
     const page = pages[i];
