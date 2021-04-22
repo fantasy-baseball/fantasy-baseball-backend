@@ -126,3 +126,22 @@ exports.postBetting = async (req, res, next) => {
     next(createError(500, err.message));
   }
 };
+
+exports.getBettingData = async (req, res, next) => {
+  try {
+    const gameDate = req.params.game_date;
+
+    const todayGame = await Game.findOne({ gameDate });
+    const { userBettingData, totalMoney } = todayGame;
+
+    res.status(200).json({
+      result: "ok",
+      data: {
+        users: userBettingData,
+        totalMoney,
+      },
+    });
+  } catch (err) {
+    next(createError(500, err.message));
+  }
+};
