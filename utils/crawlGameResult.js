@@ -185,18 +185,18 @@ const crawlGameResults = async (gameIds) => {
             record: [null, ...hitterInningRecords],
           };
 
-          const hitterRecordSummaryItems = Array.from(
+          const hitterRecordSummaryContents = Array.from(
             $hittersRecordSummaryRows[j].children
-          ).map(($hitterRecordSummaryItem) => (
-            $hitterRecordSummaryItem.textContent.trim()
+          ).map(($hitterRecordSummaryContent) => (
+            $hitterRecordSummaryContent.textContent.trim()
           ));
 
           const hitterRecordSummary = {
-            atBats: hitterRecordSummaryItems[0],
-            hits: hitterRecordSummaryItems[1],
-            runsBattedIn: hitterRecordSummaryItems[2],
-            runsScored: hitterRecordSummaryItems[3],
-            battingAverage: hitterRecordSummaryItems[4],
+            atBats: hitterRecordSummaryContents[0],
+            hits: hitterRecordSummaryContents[1],
+            runsBattedIn: hitterRecordSummaryContents[2],
+            runsScored: hitterRecordSummaryContents[3],
+            battingAverage: hitterRecordSummaryContents[4],
           };
 
           result[hitterName].summary = hitterRecordSummary;
