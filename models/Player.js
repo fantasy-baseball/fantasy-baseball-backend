@@ -19,11 +19,6 @@ const playerSchema = new mongoose.Schema({
     enum: ["hitter", "pitcher"],
     required: true,
   },
-  position: {
-    type: String,
-    required: true,
-    trim: true,
-  },
   role: {
     type: String,
     trim: true,
@@ -37,15 +32,8 @@ const playerSchema = new mongoose.Schema({
   },
   kboId: String,
   statistics: [{
-    record: Array,
-    totalScore: Number,
-    playerMoney: Number,
-    users: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
-    scorePercentage: Number,
-    date: Date,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Statistic",
   }],
 });
 

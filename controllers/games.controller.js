@@ -1,5 +1,6 @@
 const createError = require("http-errors");
 const Game = require("../models/Game");
+const Statistics = require("../models/Statistic");
 require("../models/Player");
 
 exports.getSchedule = async (req, res, next) => {
@@ -39,9 +40,30 @@ exports.getPlayers = async (req, res, next) => {
       return;
     }
 
+    let statistics = [];
+    const { players } = game;
+    for (let i = 0; i < players.length; i += 1) {
+      const playerId = players[i]._id;
+
+      statistics.push(
+        Statistics.findOne({
+          gameDate,
+          player: playerId,
+        }).lean()
+      );
+    }
+
+    statistics = await Promise.all(statistics);
+
+    for (let i = 0; i < players.length; i += 1) {
+      const player = players[i];
+      const { position } = statistics[i];
+      player.position = position;
+    }
+
     res.status(200).json({
       result: "ok",
-      data: game.players,
+      data: players,
     });
   } catch (err) {
     next(createError(500, err.message));
