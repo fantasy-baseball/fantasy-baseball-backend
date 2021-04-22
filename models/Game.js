@@ -9,8 +9,9 @@ const gameSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  userPlayData: [{
+  userBettingData: [{
     type: mongoose.Schema.Types.ObjectId,
+    ref: "UserBettingData",
   }],
   players: [{
     type: mongoose.Schema.Types.ObjectId,
