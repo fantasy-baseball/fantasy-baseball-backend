@@ -7,7 +7,7 @@ exports.login = async (req, res, next) => {
     const { name, email, picture } = profile;
 
     let user = await User.findOne({ email });
-    let isInitialLogin = false;
+    let isNewUser = false;
 
     if (!user) {
       user = await User.create({
@@ -17,7 +17,7 @@ exports.login = async (req, res, next) => {
         imageUrl: picture,
       });
 
-      isInitialLogin = true;
+      isNewUser = true;
     }
 
     res.cookie("access_token", googleToken);
@@ -30,7 +30,7 @@ exports.login = async (req, res, next) => {
         money: user.money,
         imageUrl: user.image_url,
       },
-      isInitialLogin,
+      isNewUser,
     });
   } catch (err) {
     next(createError(500, err.message));
