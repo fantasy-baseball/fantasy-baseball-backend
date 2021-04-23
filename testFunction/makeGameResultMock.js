@@ -52,7 +52,7 @@ const makeGameResultMock = async (gameDateString) => {
       gameScheduleJson
     );
 
-    console.log("save game schedule!");
+    console.log("save game schedule");
 
     const gameResults = await crawlGameResults(gameIds);
     console.log("get gameResults");
