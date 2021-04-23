@@ -5,6 +5,7 @@ const Player = require("../models/Player");
 const Statistics = require("../models/Statistic");
 const User = require("../models/User");
 const UserBettingData = require("../models/UserBettingData");
+const Statistic = require("../models/Statistic");
 
 exports.getSchedule = async (req, res, next) => {
   try {
@@ -78,22 +79,6 @@ exports.postBetting = async (req, res, next) => {
     const { email } = res.locals.profile;
     const { date, roaster, bettingMoney } = req.body;
 
-    const roasterWithKboId = await Promise.all(
-      roaster.map((id) => Player.findOne({ kboId: id }, "_id"))
-    );
-    const roasterWithId = roasterWithKboId.map((object) => object._id);
-
-    const user = await User.findOne({ email });
-    const userBettingData = await UserBettingData.findOne({ user: user._id });
-
-    if (userBettingData) {
-      res.status(409).json({
-        result: "duplicate",
-        message: "Can't save user play data because data already exists",
-      });
-      return;
-    }
-
     const isBettingOpened = checkBettingOpened(new Date());
 
     if (isBettingOpened === false) {
@@ -103,6 +88,48 @@ exports.postBetting = async (req, res, next) => {
       });
       return;
     }
+
+    const user = await User.findOne({ email });
+
+    const { userBettingData } = await Game
+      .findOne(
+        { gameDate: date },
+        "userBettingData"
+      )
+      .populate("userBettingData")
+      .lean();
+
+    if (userBettingData.find(
+      (bettingData) => bettingData.user.toString() === user._id.toString()
+    )) {
+      res.status(409).json({
+        result: "duplicate",
+        message: "Can't save user play data because data already exists",
+      });
+      return;
+    }
+
+    const roasterWithKboId = await Promise.all(
+      roaster.map((id) => Player.findOne({ kboId: id }, "_id"))
+    );
+    const roasterWithId = roasterWithKboId.map((object) => object._id);
+
+    await Promise.all(
+      roasterWithId.map((id) => Statistic.findOneAndUpdate(
+        { gameDate: date, player: id },
+        {
+          $push: {
+            users: {
+              _id: user._id,
+              bettingMoney: bettingMoney / 10,
+            },
+          },
+          $inc: {
+            playerMoney: bettingMoney / 10,
+          },
+        }
+      ))
+    );
 
     const newBettingData = await UserBettingData.create({
       user: user._id,
