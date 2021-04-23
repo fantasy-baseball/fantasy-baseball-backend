@@ -9,7 +9,10 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
-const authenticateUser = require("./middlewares/authenticateUser");
+// TODO: 이메일 스케쥴링 작업 필요
+// const sendBettingStartMail = require("./services/mail");
+
+// sendBettingStartMail();
 
 const connectMongoDB = require("./config/connectMongoDB");
 
