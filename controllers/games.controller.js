@@ -120,7 +120,7 @@ exports.postBetting = async (req, res, next) => {
         {
           $push: {
             users: {
-              _id: user._id,
+              id: user._id,
               bettingMoney: bettingMoney / 10,
             },
           },
