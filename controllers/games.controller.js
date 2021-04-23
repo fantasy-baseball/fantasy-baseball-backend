@@ -104,7 +104,7 @@ exports.postBetting = async (req, res, next) => {
       return;
     }
 
-    const bettingData = await UserBettingData.create({
+    const newBettingData = await UserBettingData.create({
       user: user._id,
       bettingMoney,
       roaster: roasterWithId,
@@ -114,7 +114,7 @@ exports.postBetting = async (req, res, next) => {
       { gameDate: date },
       {
         $push: {
-          userBettingData: bettingData,
+          userBettingData: newBettingData,
         },
         $inc: {
           totalMoney: bettingMoney,
