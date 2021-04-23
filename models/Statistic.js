@@ -10,13 +10,28 @@ const statisticSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  totalScore: Number,
-  playerMoney: Number,
+  totalScore: {
+    type: Number,
+    default: 0,
+  },
+  playerMoney: {
+    type: Number,
+    default: 0,
+  },
   users: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    bettingMoney: {
+      type: Number,
+      default: 0,
+    }
   }],
-  scorePercentage: Number,
+  scorePercentage: {
+    type: Number,
+    default: 0,
+  },
   gameDate: String,
 });
 
