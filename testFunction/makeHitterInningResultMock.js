@@ -34,64 +34,37 @@ const getNextDateString = (dateString, number) => {
   return newYearString + newMonthString + newDateString;
 };
 
-const makeHitterInningResultMock = async (startDateString, daysNumber) => {
-  if (typeof startDateString !== "string") {
-    throw new Error("startDateString must be string");
-  }
-
-  let currentDateString = startDateString;
-
-  let gameSchedules = [];
-  const dateStrings = [];
-  for (let i = 0; i < daysNumber; i += 1) {
-    gameSchedules.push(
-      crawlGameSchedule(currentDateString)
-    );
-
-    console.log(currentDateString);
-    dateStrings.push(currentDateString);
-    currentDateString = getNextDateString(currentDateString, -1);
+const makeHitterInningResultMock = async (gameDateString) => {
+  if (typeof gameDateString !== "string") {
+    throw new Error("gameDateString must be string");
   }
 
   try {
-    gameSchedules = await Promise.all(gameSchedules);
-  } catch (err) {
-    console.error("get schedule error!");
-  }
+    const gameSchedule = await crawlGameSchedule(gameDateString);
 
-  console.log("get schedule!");
+    console.log("get schedule");
 
-  const gameIds = [];
-  const gameSchedulesFiles = [];
-  for (let i = 0; i < gameSchedules.length; i += 1) {
-    const gameSchedule = gameSchedules[i];
     const gameScheduleJson = JSON.stringify(gameSchedule);
+    const gameIds = gameSchedule.map((game) => game.gameId);
 
-    for (let j = 0; j < gameSchedule.length; j += 1) {
-      const { gameId } = gameSchedule[j];
-      gameIds.push(gameId);
-    }
-
-    gameSchedulesFiles.push(
-      writeFile(`${gameSchedulesDir}/${dateStrings[i]}.json`, gameScheduleJson)
+    await writeFile(
+      `${gameSchedulesDir}/${gameDateString}.json`,
+      gameScheduleJson
     );
-  }
 
-  try {
-    await Promise.all(gameSchedulesFiles);
     console.log("save game schedule!");
 
     const gameResults = await crawlGameResults(gameIds);
     console.log("get gameResults");
 
-    const gameResultsFiles = [];
+    const gameResultFiles = [];
     for (let i = 0; i < gameResults.length; i += 1) {
       const gameResult = gameResults[i];
       const gameResultJson = JSON.stringify(gameResult);
 
       const { gameId } = gameResult;
 
-      gameResultsFiles.push(
+      gameResultFiles.push(
         writeFile(
           `${hitterInningResultsDir}/${gameId}.json`,
           gameResultJson
@@ -99,22 +72,26 @@ const makeHitterInningResultMock = async (startDateString, daysNumber) => {
       );
     }
 
-    await Promise.all(gameResultsFiles);
+    await Promise.all(gameResultFiles);
   } catch (err) {
-    console.error(err.message);
+    console.log(err);
   }
-
-  return getNextDateString(
-    dateStrings[dateStrings.length - 1],
-    -1
-  );
 };
 
-(async () => {
-  let nextDateString = "20201124";
-  while (true) {
-    nextDateString = await makeHitterInningResultMock(nextDateString, 1);
-  }
-})();
+const saveGameDataContinuously = async (startDateString, endDateString, dayStep) => {
+  try {
+    let currentDateString = startDateString;
+    while (currentDateString !== endDateString) {
+      await makeHitterInningResultMock(currentDateString);
+      console.log(`${currentDateString} complete`);
 
-// test: node testFunction/makeHitterInningResultMock.js
+      currentDateString = getNextDateString(currentDateString, dayStep);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+saveGameDataContinuously("20210422", "20210420", -1);
+
+// exec: node testFunction/makeHitterInningResultMock.js
