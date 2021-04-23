@@ -34,7 +34,7 @@ const getNextDateString = (dateString, number) => {
   return newYearString + newMonthString + newDateString;
 };
 
-const makeHitterInningResultMock = async (gameDateString) => {
+const makeGameResultMock = async (gameDateString) => {
   if (typeof gameDateString !== "string") {
     throw new Error("gameDateString must be string");
   }
@@ -82,7 +82,7 @@ const saveGameDataContinuously = async (startDateString, endDateString, dayStep)
   try {
     let currentDateString = startDateString;
     while (currentDateString !== endDateString) {
-      await makeHitterInningResultMock(currentDateString);
+      await makeGameResultMock(currentDateString);
       console.log(`${currentDateString} complete`);
 
       currentDateString = getNextDateString(currentDateString, dayStep);
@@ -94,4 +94,4 @@ const saveGameDataContinuously = async (startDateString, endDateString, dayStep)
 
 saveGameDataContinuously("20210422", "20210420", -1);
 
-// exec: node testFunction/makeHitterInningResultMock.js
+// exec: node testFunction/makeGameResultMock.js
