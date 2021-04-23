@@ -5,7 +5,7 @@ const Game = require("../models/Game");
 const Player = require("../models/Player");
 const Statistic = require("../models/Statistic");
 
-module.exports = async (dateNumber) => {
+const saveGame = async (dateNumber) => {
   let dateString = dateNumber;
   if (typeof dateString !== "string") {
     dateString = dateNumber.toString();
@@ -120,6 +120,8 @@ module.exports = async (dateNumber) => {
     console.log(err);
   }
 };
+
+module.exports = saveGame;
 
 /*
 in app.js
