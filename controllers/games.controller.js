@@ -1,10 +1,10 @@
 const createError = require("http-errors");
+const checkBettingOpened = require("../utils/index");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
 const Statistics = require("../models/Statistic");
 const User = require("../models/User");
 const UserBettingData = require("../models/UserBettingData");
-require("../models/Player");
 
 exports.getSchedule = async (req, res, next) => {
   try {
@@ -90,6 +90,16 @@ exports.postBetting = async (req, res, next) => {
       res.status(409).json({
         result: "duplicate",
         message: "Can't save user play data because data already exists",
+      });
+      return;
+    }
+
+    const isBettingOpened = checkBettingOpened(new Date());
+
+    if (isBettingOpened === false) {
+      res.status(403).json({
+        result: "close",
+        message: "Betting is closed",
       });
       return;
     }
