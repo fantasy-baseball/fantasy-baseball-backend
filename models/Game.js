@@ -75,6 +75,10 @@ const gameSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  hasResult: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Game", gameSchema);
