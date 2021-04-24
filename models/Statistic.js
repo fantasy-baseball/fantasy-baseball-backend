@@ -10,11 +10,11 @@ const statisticSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  totalScore: {
+  score: {
     type: Number,
     default: 0,
   },
-  playerMoney: {
+  totalBettingMoney: {
     type: Number,
     default: 0,
   },
@@ -26,7 +26,8 @@ const statisticSchema = new mongoose.Schema({
     bettingMoney: {
       type: Number,
       default: 0,
-    }
+    },
+    _id: false,
   }],
   scorePercentage: {
     type: Number,
