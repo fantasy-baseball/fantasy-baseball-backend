@@ -76,8 +76,9 @@ exports.getPlayers = async (req, res, next) => {
 
 exports.postBetting = async (req, res, next) => {
   try {
+    const gameDate = req.params.game_date;
     const { email } = res.locals.profile;
-    const { date, roaster, bettingMoney } = req.body;
+    const { roaster, bettingMoney } = req.body;
 
     const isBettingOpened = checkBettingOpened(new Date());
 
@@ -93,7 +94,7 @@ exports.postBetting = async (req, res, next) => {
 
     const { userBettingData } = await Game
       .findOne(
-        { gameDate: date },
+        { gameDate },
         "userBettingData"
       )
       .populate("userBettingData")
@@ -116,7 +117,7 @@ exports.postBetting = async (req, res, next) => {
 
     await Promise.all(
       roasterWithId.map((id) => Statistic.findOneAndUpdate(
-        { gameDate: date, player: id },
+        { gameDate, player: id },
         {
           $push: {
             users: {
@@ -125,7 +126,7 @@ exports.postBetting = async (req, res, next) => {
             },
           },
           $inc: {
-            playerMoney: bettingMoney / 10,
+            totalBettingMoney: bettingMoney / 10,
           },
         }
       ))
@@ -138,7 +139,7 @@ exports.postBetting = async (req, res, next) => {
     });
 
     await Game.findOneAndUpdate(
-      { gameDate: date },
+      { gameDate },
       {
         $push: {
           userBettingData: newBettingData,
