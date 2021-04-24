@@ -57,13 +57,17 @@ const saveGame = async (dateNumber) => {
     let newStatistics = [];
     for (let i = 0; i < playersWithInfo.length; i += 1) {
       const {
+        name,
+        team,
         position,
         playerType,
       } = playersWithInfo[i];
 
       newStatistics.push(Statistic.create({
-        playerType,
+        name,
+        team,
         position,
+        playerType,
         gameDate: dateString,
       }));
     }
@@ -91,7 +95,7 @@ const saveGame = async (dateNumber) => {
 
       statisticsWithPlayerId.push(
         newStatistic.updateOne(
-          { player: playerId }
+          { playerId }
         )
       );
     }
@@ -126,7 +130,7 @@ module.exports = saveGame;
 /*
 in app.js
 
-const saveGame = require("./testTrigger/saveGame");
+const saveGame = require("./testFunction/saveGame");
 
 (async () => {
   await saveGame();
