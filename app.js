@@ -9,8 +9,6 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
-const authenticateUser = require("./middlewares/authenticateUser");
-
 const connectMongoDB = require("./config/connectMongoDB");
 
 connectMongoDB();
