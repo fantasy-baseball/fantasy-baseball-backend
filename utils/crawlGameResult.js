@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const { KBO_GAME_CENTER_URL } = require("../constants/crawling");
 const makeQueryString = require("./makeQueryString");
+const allSettled = require("./promiseAllSettled");
 
 const groupSummaryByPlayers = (gameSummaries) => {
   const result = [];
@@ -80,17 +81,26 @@ const crawlGameResults = async (gameIds) => {
   for (let i = 0; i < gameIds.length; i += 1) {
     const page = pages[i];
 
-    isPagesLoaded.push(page.waitForSelector(".sub-tit", { timeout: 10000 }));
+    isPagesLoaded.push(
+      page.waitForSelector(".sub-tit", { timeout: 30000 })
+    );
   }
 
-  try {
-    await Promise.all(isPagesLoaded);
-  } catch (err) {
-    throw new Error("Can't load review page");
-  }
+  const notLoadedPageIndex = (await allSettled(isPagesLoaded))
+    .map((pageLoadResult, i) => ({ ...pageLoadResult, index: i }))
+    .filter((pageLoadResult) => !pageLoadResult.result)
+    .map((pageLoadResult) => pageLoadResult.index);
+
+  const filteredGameIds = gameIds.filter((id, i) => (
+    !notLoadedPageIndex.includes(i)
+  ));
+
+  pages = pages.filter((page, i) => (
+    !notLoadedPageIndex.includes(i)
+  ));
 
   let gameSummaries = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
+  for (let i = 0; i < filteredGameIds.length; i += 1) {
     const page = pages[i];
 
     gameSummaries.push(page.evaluate(() => {
@@ -116,7 +126,7 @@ const crawlGameResults = async (gameIds) => {
   const gameSummariesByPlayers = groupSummaryByPlayers(gameSummaries);
 
   let playersRecords = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
+  for (let i = 0; i < filteredGameIds.length; i += 1) {
     const page = pages[i];
 
     playersRecords.push(page.evaluate(() => {
@@ -282,8 +292,8 @@ const crawlGameResults = async (gameIds) => {
   playersRecords = await Promise.all(playersRecords);
 
   const result = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
-    const gameId = gameIds[i];
+  for (let i = 0; i < filteredGameIds.length; i += 1) {
+    const gameId = filteredGameIds[i];
     const gameSummary = gameSummariesByPlayers[i];
     const playersRecord = playersRecords[i];
 
