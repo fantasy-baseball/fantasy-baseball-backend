@@ -51,7 +51,7 @@ exports.getPlayers = async (req, res, next) => {
       statistics.push(
         Statistics.findOne({
           gameDate,
-          player: playerId,
+          playerId,
         }).lean()
       );
     }
