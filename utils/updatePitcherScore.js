@@ -109,7 +109,7 @@ const updatePitcherScore = async (gameDate) => {
     playerType: "pitcher",
   }).lean();
 
-  let statistics = [];
+  const statistics = [];
 
   for (let i = 0; i < pitchers.length; i += 1) {
     const { record, _id } = pitchers[i];
@@ -120,7 +120,7 @@ const updatePitcherScore = async (gameDate) => {
     );
   }
 
-  statistics = await Promise.all(statistics);
+  await Promise.all(statistics);
 
   updateScorePercentage("투수", gameDate);
 };
