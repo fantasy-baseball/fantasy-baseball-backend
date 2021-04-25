@@ -161,7 +161,11 @@ const crawlGameResults = async (gameIds) => {
       const $homePitcherRecordRows = document.querySelectorAll("#homePitRecord tbody tr");
 
       const getHittersRecord = (
-        hitterNames, hitterPositions, $hittersRecordRows, $hittersRecordSummaryRows
+        hitterNames,
+        hitterPositions,
+        hitterTeam,
+        $hittersRecordRows,
+        $hittersRecordSummaryRows
       ) => {
         const result = {};
         const hitterNamesCount = {};
@@ -187,6 +191,7 @@ const crawlGameResults = async (gameIds) => {
           }
 
           result[hitterName] = {
+            team: hitterTeam,
             position: hitterPosition,
             record: [null, ...hitterInningRecords],
           };
@@ -211,7 +216,7 @@ const crawlGameResults = async (gameIds) => {
         return result;
       };
 
-      const getPitchersRecord = ($pitchersRecordRows) => {
+      const getPitchersRecord = ($pitchersRecordRows, pitcherTeam) => {
         const result = {};
 
         const keys = [
@@ -237,14 +242,17 @@ const crawlGameResults = async (gameIds) => {
         for (let j = 0; j < $pitchersRecordRows.length; j += 1) {
           const $pitchersRecordRow = $pitchersRecordRows[j];
           const pitcherName = $pitchersRecordRow.children[0].textContent.trim();
-          const record = {};
+          const pitcherInfo = {};
+
+          pitcherInfo.team = pitcherTeam;
+          pitcherInfo.record = {};
 
           for (let k = 1; k < $pitchersRecordRow.children.length; k += 1) {
-            const pitchersRecordData = $pitchersRecordRow.children[k].textContent.trim();
-            record[keys[k]] = pitchersRecordData;
+            const pitchersRecordContent = $pitchersRecordRow.children[k].textContent.trim();
+            pitcherInfo.record[keys[k]] = pitchersRecordContent;
           }
 
-          result[pitcherName] = record;
+          result[pitcherName] = pitcherInfo;
         }
 
         return result;
@@ -253,28 +261,30 @@ const crawlGameResults = async (gameIds) => {
       const awayHittersRecord = getHittersRecord(
         awayHitters,
         awayPositions,
+        awayTeam,
         $awayHitterRecordRows,
         $awayHitterRecordSummaryRows
       );
       const homeHittersRecord = getHittersRecord(
         homeHitters,
         homePositions,
+        homeTeam,
         $homeHitterRecordRows,
         $homeHitterRecordSummaryRows
       );
 
-      const awayPitchersRecord = getPitchersRecord($awayPitcherRecordRows);
-      const homePitchersRecord = getPitchersRecord($homePitcherRecordRows);
+      const awayPitchersRecord = getPitchersRecord(
+        $awayPitcherRecordRows,
+        awayTeam
+      );
+      const homePitchersRecord = getPitchersRecord(
+        $homePitcherRecordRows,
+        homeTeam
+      );
 
       return {
-        [awayTeam]: {
-          hitters: awayHittersRecord,
-          pitchers: awayPitchersRecord,
-        },
-        [homeTeam]: {
-          hitters: homeHittersRecord,
-          pitchers: homePitchersRecord,
-        },
+        hitters: { ...awayHittersRecord, ...homeHittersRecord },
+        pitchers: { ...awayPitchersRecord, ...homePitchersRecord },
       };
     }));
   }
