@@ -63,7 +63,7 @@ exports.RECORD_FILTER = {
   findSO: /삼진/,
   findWH: /결승타/,
   findRO: /주루사|견제사/,
-  findDP: /병$|중$/,
+  findDP: /병살타/,
   findSB: /도루/,
   findCS: /도루자/,
   findErr: /실책/,
