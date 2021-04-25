@@ -1,6 +1,6 @@
 const Statistic = require("../models/Statistic");
 
-const calculateScorePercentage = async (position, gameDate) => {
+const updateScorePercentage = async (position, gameDate) => {
   const statistics = [];
   let players = await Statistic.find({
     gameDate,
@@ -41,4 +41,4 @@ const calculateScorePercentage = async (position, gameDate) => {
   await Promise.all(statistics);
 };
 
-module.exports = calculateScorePercentage;
+module.exports = updateScorePercentage;
