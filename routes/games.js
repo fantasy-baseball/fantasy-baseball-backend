@@ -8,5 +8,6 @@ router.get("/:game_date/schedule", gamesController.getSchedule);
 router.get("/:game_date/players", gamesController.getPlayers);
 router.get("/:game_date/betting", gamesController.getBettingData);
 router.post("/:game_date/betting", authenticateUser, gamesController.postBetting);
+router.get("/:game_date/rankings/users", gamesController.getUserRankings);
 
 module.exports = router;

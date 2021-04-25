@@ -155,3 +155,25 @@ exports.getBettingData = async (req, res, next) => {
     next(createError(500, err.message));
   }
 };
+
+exports.getUserRankings = async (req, res, next) => {
+  try {
+    const gameDate = req.params.game_date;
+    const { query } = req;
+    const userRankings = await UserBettingData.find({ gameDate }, "earnedMoney user")
+      .sort({ earnedMoney: -1 });
+    let filteredUserRankings;
+
+    if (query.from && query.to) {
+      filteredUserRankings = userRankings.slice(query.from - 1, query.to);
+    }
+
+    res.status(200).json({
+      result: "ok",
+      data: filteredUserRankings,
+    });
+  } catch (err) {
+    console.error(err);
+    next(createError(500, "error"));
+  }
+};
