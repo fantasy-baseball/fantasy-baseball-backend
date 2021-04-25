@@ -165,9 +165,9 @@ const updateHitterScore = async (gameDate) => {
   const hitters = await Statistic.find({
     gameDate,
     playerType: "hitter",
-  });
+  }).lean();
 
-  let statistics = [];
+  const statistics = [];
 
   for (let i = 0; i < hitters.length; i += 1) {
     const { record, _id } = hitters[i];
@@ -178,7 +178,7 @@ const updateHitterScore = async (gameDate) => {
     );
   }
 
-  statistics = await Promise.all(statistics);
+  await Promise.all(statistics);
 
   for (let i = 0; i < POSITIONS.length; i += 1) {
     updateScorePercentage(POSITIONS[i], gameDate);
