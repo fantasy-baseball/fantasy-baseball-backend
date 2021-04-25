@@ -85,25 +85,25 @@ const calculateBettingMoney = async (gameDate) => {
     },
   ]);
 
-  const selectedFirstPlayerUsers = [];
-  const selectedSecondPlayerUsers = [];
+  const usersSelectingFirstPlayer = [];
+  const usersSelectingSecondPlayer = [];
   let awardedUsers = [];
 
-  statisticsPerPosition.forEach((position, posIndex) => {
+  statisticsPerPosition.forEach((position, positionIndex) => {
     const bestScore = position.players[0].score;
     let secondScore;
 
     position.players.forEach((player) => {
       if (bestScore === player.score) {
-        if (selectedFirstPlayerUsers[posIndex]) {
-          selectedFirstPlayerUsers[posIndex].users.push(
+        if (usersSelectingFirstPlayer[positionIndex]) {
+          usersSelectingFirstPlayer[positionIndex].users.push(
             player.users
           );
           awardedUsers.push(player.users);
           return;
         }
 
-        selectedFirstPlayerUsers.push({
+        usersSelectingFirstPlayer.push({
           position: position._id,
           users: [player.users],
         });
@@ -112,7 +112,7 @@ const calculateBettingMoney = async (gameDate) => {
       }
 
       // 1등 동점자가 존재하는 경우 2등은 계산하지 않음
-      if (selectedFirstPlayerUsers[posIndex].users.length > 1) return;
+      if (usersSelectingFirstPlayer[positionIndex].users.length > 1) return;
 
       // 2등 스코어 최초 등장
       if (bestScore > player.score) {
@@ -120,7 +120,7 @@ const calculateBettingMoney = async (gameDate) => {
         if (secondScore !== undefined && secondScore > player.score) return;
 
         secondScore = player.score;
-        selectedSecondPlayerUsers.push({
+        usersSelectingSecondPlayer.push({
           position: position._id,
           users: [player.users],
         });
@@ -129,8 +129,8 @@ const calculateBettingMoney = async (gameDate) => {
       }
 
       if (secondScore === player.score) {
-        if (selectedSecondPlayerUsers[posIndex]) {
-          selectedSecondPlayerUsers[posIndex].users.push(
+        if (usersSelectingSecondPlayer[positionIndex]) {
+          usersSelectingSecondPlayer[positionIndex].users.push(
             player.users
           );
           awardedUsers.push(player.users);
@@ -159,9 +159,9 @@ const calculateBettingMoney = async (gameDate) => {
   );
 
   // 1등에게 0.7% 지분 분배
-  await calculateLosingMoneyForWinner(selectedFirstPlayerUsers, gameDate, 0.7);
+  await calculateLosingMoneyForWinner(usersSelectingFirstPlayer, gameDate, 0.7);
   // 2등에게 0.3% 지분 분배
-  await calculateLosingMoneyForWinner(selectedSecondPlayerUsers, gameDate, 0.3);
+  await calculateLosingMoneyForWinner(usersSelectingSecondPlayer, gameDate, 0.3);
 
   console.log("Calculate earned money for betting");
 };
