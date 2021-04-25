@@ -52,7 +52,7 @@ exports.getPlayers = async (req, res, next) => {
       statistics.push(
         Statistics.findOne({
           gameDate,
-          player: playerId,
+          playerId,
         }).lean()
       );
     }
@@ -92,17 +92,28 @@ exports.postBetting = async (req, res, next) => {
 
     const user = await User.findOne({ email });
 
-    const { userBettingData } = await Game
-      .findOne(
-        { gameDate },
-        "userBettingData"
-      )
-      .populate("userBettingData")
-      .lean();
+    // const { userBettingData } = await Game
+    //   .findOne(
+    //     { gameDate },
+    //     "userBettingData"
+    //   )
+    //   .populate("userBettingData")
+    //   .lean();
 
-    if (userBettingData.find(
-      (bettingData) => bettingData.user.toString() === user._id.toString()
-    )) {
+    // if (userBettingData.find(
+    //   (bettingData) => bettingData.user.toString() === user._id.toString()
+    // )) {
+    //   res.status(409).json({
+    //     result: "duplicate",
+    //     message: "Can't save user play data because data already exists",
+    //   });
+    //   return;
+    // }
+
+    const userBettingData = await UserBettingData
+      .findOne({ gameDate, user: user._id });
+
+    if (userBettingData) {
       res.status(409).json({
         result: "duplicate",
         message: "Can't save user play data because data already exists",
@@ -117,7 +128,7 @@ exports.postBetting = async (req, res, next) => {
 
     await Promise.all(
       roasterWithId.map((id) => Statistic.findOneAndUpdate(
-        { gameDate, player: id },
+        { gameDate, playerId: id },
         {
           $push: {
             users: {
@@ -134,6 +145,7 @@ exports.postBetting = async (req, res, next) => {
 
     const newBettingData = await UserBettingData.create({
       user: user._id,
+      gameDate,
       bettingMoney,
       roaster: roasterWithId,
     });
