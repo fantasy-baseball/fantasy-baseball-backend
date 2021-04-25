@@ -6,6 +6,10 @@ const userBettingDataSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  gameDate: {
+    type: String,
+    required: true,
+  },
   bettingMoney: {
     type: Number,
     required: true,
@@ -15,13 +19,16 @@ const userBettingDataSchema = new mongoose.Schema({
     ref: "Player",
     required: true,
   }],
-  earnedMoney: Number,
+  earnedMoney: {
+    type: Number,
+    default: 0,
+  },
   rank: Number,
   isCalculated: {
     type: Boolean,
     required: true,
     default: false,
-  }
+  },
 });
 
 module.exports = mongoose.model("UserBettingData", userBettingDataSchema);

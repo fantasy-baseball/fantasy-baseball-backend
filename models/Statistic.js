@@ -1,15 +1,30 @@
 const mongoose = require("mongoose");
 
 const statisticSchema = new mongoose.Schema({
-  player: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Player",
+  name: {
+    type: String,
+    required: true,
+    trim: true,
   },
-  record: Array,
+  team: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  playerType: {
+    type: String,
+    enum: ["hitter", "pitcher"],
+    required: true,
+  },
   position: {
     type: String,
     trim: true,
   },
+  playerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Player",
+  },
+  record: Object,
   score: {
     type: Number,
     default: 0,
