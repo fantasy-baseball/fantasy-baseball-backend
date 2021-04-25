@@ -103,13 +103,13 @@ exports.postBetting = async (req, res, next) => {
       return;
     }
 
-    const roasterWithKboId = await Promise.all(
+    const selectedPlayers = await Promise.all(
       roaster.map((id) => Player.findOne({ kboId: id }, "_id"))
     );
-    const roasterWithId = roasterWithKboId.map((object) => object._id);
+    const selectedPlayerIds = selectedPlayers.map((object) => object._id);
 
     await Promise.all(
-      roasterWithId.map((id) => Statistic.findOneAndUpdate(
+      selectedPlayerIds.map((id) => Statistic.findOneAndUpdate(
         { gameDate, playerId: id },
         {
           $push: {
@@ -129,7 +129,7 @@ exports.postBetting = async (req, res, next) => {
       user: user._id,
       gameDate,
       bettingMoney,
-      roaster: roasterWithId,
+      roaster: selectedPlayerIds,
     });
 
     await Game.findOneAndUpdate(
