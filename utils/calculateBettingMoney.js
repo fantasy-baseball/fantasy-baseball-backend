@@ -23,7 +23,9 @@ const calculateLosingMoneyForWinner = async (winners, gameDate, ratio) => {
         const totalWinnerMoneyPerGroup = group.reduce((acc, winner) => (
           acc + winner.bettingMoney),
         0);
-        const percentage = Number((user.bettingMoney / totalWinnerMoneyPerGroup).toFixed(2));
+        const percentage = Number(
+          (user.bettingMoney / totalWinnerMoneyPerGroup).toFixed(2)
+        );
         winnerList.push({
           id: user.id,
           earnedMoney: Math.round(totalWinnerMoney * percentage),
