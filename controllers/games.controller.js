@@ -92,24 +92,6 @@ exports.postBetting = async (req, res, next) => {
 
     const user = await User.findOne({ email });
 
-    // const { userBettingData } = await Game
-    //   .findOne(
-    //     { gameDate },
-    //     "userBettingData"
-    //   )
-    //   .populate("userBettingData")
-    //   .lean();
-
-    // if (userBettingData.find(
-    //   (bettingData) => bettingData.user.toString() === user._id.toString()
-    // )) {
-    //   res.status(409).json({
-    //     result: "duplicate",
-    //     message: "Can't save user play data because data already exists",
-    //   });
-    //   return;
-    // }
-
     const userBettingData = await UserBettingData
       .findOne({ gameDate, user: user._id });
 
