@@ -7,7 +7,9 @@ const updateTotalScore = async (gameDate) => {
   }, "score").lean();
 
   const playerTotalScore = playerScores.reduce(
-    (totalScore, player) => totalScore + player.score, 0
+    (totalScore, player) => (
+      totalScore + player.score
+    ), 0
   );
 
   await Game.findOneAndUpdate(
