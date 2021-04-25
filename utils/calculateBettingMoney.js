@@ -3,7 +3,7 @@ const User = require("../models/User");
 const Statistic = require("../models/Statistic");
 const UserBettingData = require("../models/UserBettingData");
 
-const calculateLosingMoneyForWinner = async (winners, gameDate) => {
+const calculateLosingMoneyForWinner = async (winners, gameDate, ratio) => {
   const gameData = await Game.findOne({ gameDate });
   const totalBettingMoney = gameData.totalMoney / 10;
   const winnerList = [];
@@ -12,7 +12,7 @@ const calculateLosingMoneyForWinner = async (winners, gameDate) => {
     const totalWinnerMoney = position.users
       .flat()
       .reduce((acc, winner) => acc + winner.bettingMoney, 0);
-    let losingMoney = totalBettingMoney - totalWinnerMoney;
+    let losingMoney = (totalBettingMoney - totalWinnerMoney) * ratio;
 
     position.users.forEach((group) => {
       if (position.users.length > 1) {
@@ -159,9 +159,9 @@ const calculateBettingMoney = async (gameDate) => {
   );
 
   // 1등에게 0.7% 지분 분배
-  await calculateLosingMoneyForWinner(selectedFirstPlayerUsers, gameDate);
+  await calculateLosingMoneyForWinner(selectedFirstPlayerUsers, gameDate, 0.7);
   // 2등에게 0.3% 지분 분배
-  await calculateLosingMoneyForWinner(selectedSecondPlayerUsers, gameDate);
+  await calculateLosingMoneyForWinner(selectedSecondPlayerUsers, gameDate, 0.3);
 
   console.log("Calculate earned money for betting");
 };
