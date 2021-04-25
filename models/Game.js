@@ -9,8 +9,9 @@ const gameSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  userPlayData: [{
+  userBettingData: [{
     type: mongoose.Schema.Types.ObjectId,
+    ref: "UserBettingData",
   }],
   players: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -62,9 +63,21 @@ const gameSchema = new mongoose.Schema({
       trim: true,
     },
   }],
-  totalMoney: Number,
-  totalScore: Number,
-  isOpened: Boolean,
+  totalMoney: {
+    type: Number,
+    default: 0,
+  },
+  totalScore: {
+    type: Number,
+    default: 0,
+  },
+  isOpened: {
+    type: Boolean,
+    default: false,
+  },
+  hasResult: {
+    type: Boolean,
+    default: false,
+  },
 });
-
 module.exports = mongoose.model("Game", gameSchema);
