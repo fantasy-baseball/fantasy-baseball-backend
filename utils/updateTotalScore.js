@@ -6,11 +6,14 @@ const updateTotalScore = async (gameDate) => {
     gameDate,
   }, "score").lean();
 
-  const totalScore = playerScores.reduce(
-    (acc, curr) => acc + curr.score, 0
+  const playerTotalScore = playerScores.reduce(
+    (totalScore, player) => totalScore + player.score, 0
   );
 
-  await Game.findOneAndUpdate({ gameDate }, { totalScore });
+  await Game.findOneAndUpdate(
+    { gameDate },
+    { totalScore: playerTotalScore }
+  );
 };
 
 module.exports = updateTotalScore;
