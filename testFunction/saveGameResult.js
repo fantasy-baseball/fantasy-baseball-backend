@@ -94,7 +94,7 @@ const saveGameResults = async (gameDate) => {
           record,
           summary,
           team,
-          position
+          position,
         } = playerInfo;
 
         if (!hittersRecords[player]) {
