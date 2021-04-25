@@ -34,5 +34,4 @@ const playerSchema = new mongoose.Schema({
     ref: "Statistic",
   }],
 });
-
 module.exports = mongoose.model("Player", playerSchema);
