@@ -55,39 +55,40 @@ const calculateBettingMoney = async (gameDate) => {
   // 2. score 점수로 오름차순 sorting : $sort
   // 3. position 별로 그루핑 : $group
   //    - "totalBettingMoney"의 값이 0 이상인 선수들만 $push
-  const statisticsPerPosition = await Statistic.aggregate([
-    {
-      $match: {
-        gameDate,
+  const statisticsPerPosition = await Statistic
+    .aggregate([
+      {
+        $match: {
+          gameDate,
+        },
       },
-    },
-    {
-      $sort: {
-        score: -1,
+      {
+        $sort: {
+          score: -1,
+        },
       },
-    },
-    {
-      $group: {
-        _id: "$position",
-        players: {
-          $push: {
-            $cond: {
-              if: {
-                $gt: ["$totalBettingMoney", 0],
+      {
+        $group: {
+          _id: "$position",
+          players: {
+            $push: {
+              $cond: {
+                if: {
+                  $gt: ["$totalBettingMoney", 0],
+                },
+                then: {
+                  player: "$playerId",
+                  score: "$score",
+                  totalBettingMoney: "$totalBettingMoney",
+                  users: "$users",
+                },
+                else: "$noval",
               },
-              then: {
-                player: "$playerId",
-                score: "$score",
-                totalBettingMoney: "$totalBettingMoney",
-                users: "$users",
-              },
-              else: "$noval",
             },
           },
         },
       },
-    },
-  ]);
+    ]);
 
   const usersSelectingFirstPlayer = [];
   const usersSelectingSecondPlayer = [];
