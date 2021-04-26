@@ -199,10 +199,11 @@ const sumEarnedMoneyWithUserMoney = async (gameDate) => {
 };
 
 const setBettingRankings = async (gameDate) => {
-  const sortingUserBettingData = await UserBettingData.find(
-    { gameDate },
-    "earnedMoney user"
-  )
+  const sortingUserBettingData = await UserBettingData
+    .find(
+      { gameDate },
+      "earnedMoney user"
+    )
     .sort({ earnedMoney: -1 });
   let rank = 1;
   let prevEarnedMoney;
