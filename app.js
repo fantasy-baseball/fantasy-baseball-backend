@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./services");
 
 const createError = require("http-errors");
 const express = require("express");
@@ -26,7 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({
   credentials: true,
-  origin: "http://localhost:3000",
+  origin: process.env.CLIENT_URL,
 }));
 
 app.use("/users", usersRouter);
