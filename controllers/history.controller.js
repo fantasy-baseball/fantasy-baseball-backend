@@ -2,6 +2,7 @@ const createError = require("http-errors");
 const User = require("../models/User");
 const UserBettingData = require("../models/UserBettingData");
 const { PLAYER_POSITION } = require("../constants/game");
+const Statistic = require("../models/Statistic");
 
 exports.getUserRankings = async (req, res, next) => {
   try {
@@ -32,6 +33,49 @@ exports.getUserRankings = async (req, res, next) => {
     });
   } catch (err) {
     next(createError(500, "Fail to get userRankings"));
+  }
+};
+
+exports.getPositionRankings = async (req, res, next) => {
+  try {
+    const gameDate = req.params.game_date;
+    const positionRankings = await Statistic
+      .aggregate([
+        {
+          $match: {
+            gameDate,
+          },
+        },
+        {
+          $sort: {
+            score: -1,
+          },
+        },
+        {
+          $group: {
+            _id: "$position",
+            players: {
+              $push: {
+                name: "$name",
+                team: "$team",
+                score: "$score",
+              },
+            },
+          },
+        },
+      ]);
+
+    if (positionRankings.length === 0) {
+      next(createError(404, "Can't find positionRankings"));
+      return;
+    }
+
+    res.status(200).json({
+      result: "ok",
+      data: positionRankings,
+    });
+  } catch (err) {
+    next(createError(500, "Fail to get positionRankings"));
   }
 };
 
