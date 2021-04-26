@@ -20,9 +20,11 @@ const calculateLosingMoneyForWinner = async (winners, gameDate, ratio) => {
       }
 
       group.forEach((user) => {
-        const totalWinnerMoneyPerGroup = group.reduce((acc, winner) => (
-          acc + winner.bettingMoney),
-        0);
+        const totalWinnerMoneyPerGroup = group.reduce(
+          (acc, winner) => (
+            acc + winner.bettingMoney
+          ), 0
+        );
         const percentage = Number(
           (user.bettingMoney / totalWinnerMoneyPerGroup).toFixed(2)
         );
@@ -196,8 +198,45 @@ const sumEarnedMoneyWithUserMoney = async (gameDate) => {
   console.log("Add earned money to user money");
 };
 
+const setBettingRankings = async (gameDate) => {
+  const sortingUserBettingData = await UserBettingData
+    .find(
+      { gameDate },
+      "earnedMoney user"
+    )
+    .sort({ earnedMoney: -1 });
+  let rank = 1;
+  let prevEarnedMoney;
+
+  sortingUserBettingData.forEach((data) => {
+    const currentData = data;
+
+    currentData.rank = rank;
+
+    if (data.earnedMoney === prevEarnedMoney) {
+      return;
+    }
+
+    prevEarnedMoney = data.earnedMoney;
+    rank += 1;
+  });
+
+  await Promise.all(
+    sortingUserBettingData.map((data) => (
+      UserBettingData.findByIdAndUpdate(
+        { gameDate, _id: data._id },
+        { rank: data.rank },
+        { upsert: true }
+      )
+    ))
+  );
+
+  console.log("ok");
+};
+
 // TODO : 스케쥴링에 함수 추가
 // (async () => {
 //   await calculateBettingMoney("20210420");
 //   await sumEarnedMoneyWithUserMoney("20210420");
+//   await setBettingRankings("20210420");
 // })();
