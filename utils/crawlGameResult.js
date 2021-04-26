@@ -53,81 +53,68 @@ const groupSummaryByPlayers = (gameSummaries) => {
 
 const crawlGameResults = async (gameIds) => {
   const browser = await puppeteer.launch();
+  const pages = await Promise.all(
+    gameIds.map(() => browser.newPage())
+  );
 
-  let pages = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
-    pages.push(browser.newPage());
-  }
+  await Promise.all(
+    gameIds.map((gameId, i) => {
+      const page = pages[i];
+      const queryString = makeQueryString({
+        gameDate: gameId.slice(0, 8),
+        gameId,
+        section: "REVIEW",
+      });
 
-  pages = await Promise.all(pages);
+      return page.goto(KBO_GAME_CENTER_URL + queryString);
+    })
+  );
 
-  const playerInfoPages = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
-    const page = pages[i];
-    const queryString = makeQueryString({
-      gameDate: gameIds[i].slice(0, 8),
-      gameId: gameIds[i],
-      section: "REVIEW",
-    });
+  const pageLoadResults = await allSettled(
+    pages.map(
+      (page) => page.waitForSelector(".sub-tit", { timeout: 10000 })
+    )
+  );
 
-    playerInfoPages.push(
-      page.goto(KBO_GAME_CENTER_URL + queryString)
-    );
-  }
-
-  await Promise.all(playerInfoPages);
-
-  const isPagesLoaded = [];
-  for (let i = 0; i < gameIds.length; i += 1) {
-    const page = pages[i];
-
-    isPagesLoaded.push(
-      page.waitForSelector(".sub-tit", { timeout: 30000 })
-    );
-  }
-
-  const notLoadedPageIndex = (await allSettled(isPagesLoaded))
-    .map((pageLoadResult, i) => ({ ...pageLoadResult, index: i }))
-    .filter((pageLoadResult) => !pageLoadResult.result)
-    .map((pageLoadResult) => pageLoadResult.index);
-
-  const filteredGameIds = gameIds.filter((id, i) => (
-    !notLoadedPageIndex.includes(i)
+  const loadedGameIds = gameIds.filter((id, i) => (
+    pageLoadResults[i].result
   ));
 
-  pages = pages.filter((page, i) => (
-    !notLoadedPageIndex.includes(i)
+  const loadedPages = pages.filter((page, i) => (
+    pageLoadResults[i].result
   ));
 
-  let gameSummaries = [];
-  for (let i = 0; i < filteredGameIds.length; i += 1) {
-    const page = pages[i];
+  const gameSummaries = await Promise.all(
+    loadedGameIds.map((gameId, i) => {
+      const page = loadedPages[i];
 
-    gameSummaries.push(page.evaluate(() => {
-      const gameSummary = {};
-      const $records = document.querySelectorAll(".summary tr");
-      const exceptionKeys = ["심판", "홈런", "2루타", "3루타"];
+      return (
+        page.evaluate(() => {
+          const gameSummary = {};
+          const $records = document.querySelectorAll(".summary tr");
+          const exceptionKeys = ["심판", "홈런", "2루타", "3루타"];
 
-      for (let j = 0; j < $records.length; j += 1) {
-        const record = $records[j];
-        const recordName = record.children[0].textContent.trim();
-        const recordedPlayersString = record.children[1].textContent.trim();
+          for (let j = 0; j < $records.length; j += 1) {
+            const record = $records[j];
+            const recordName = record.children[0].textContent.trim();
+            const recordedPlayersString = record.children[1].textContent.trim();
 
-        if (!exceptionKeys.includes(recordName)) {
-          gameSummary[recordName] = recordedPlayersString;
-        }
-      }
+            if (!exceptionKeys.includes(recordName)) {
+              gameSummary[recordName] = recordedPlayersString;
+            }
+          }
 
-      return gameSummary;
-    }));
-  }
+          return gameSummary;
+        })
+      );
+    })
+  );
 
-  gameSummaries = await Promise.all(gameSummaries);
   const gameSummariesByPlayers = groupSummaryByPlayers(gameSummaries);
 
   let playersRecords = [];
-  for (let i = 0; i < filteredGameIds.length; i += 1) {
-    const page = pages[i];
+  for (let i = 0; i < loadedGameIds.length; i += 1) {
+    const page = loadedPages[i];
 
     playersRecords.push(page.evaluate(() => {
       const $game = document.querySelector(".list-review.on");
@@ -291,18 +278,16 @@ const crawlGameResults = async (gameIds) => {
 
   playersRecords = await Promise.all(playersRecords);
 
-  const result = [];
-  for (let i = 0; i < filteredGameIds.length; i += 1) {
-    const gameId = filteredGameIds[i];
+  const result = loadedGameIds.map((gameId, i) => {
     const gameSummary = gameSummariesByPlayers[i];
     const playersRecord = playersRecords[i];
 
-    result.push({
+    return ({
       gameId,
       gameSummary,
       playersRecord,
     });
-  }
+  });
 
   await browser.close();
 

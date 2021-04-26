@@ -8,90 +8,74 @@ const crawlPlayersInfo = async (players) => {
   }
 
   const browser = await puppeteer.launch();
+  const pages = await Promise.all(
+    players.map(() => browser.newPage())
+  );
 
-  let pages = [];
-  for (let i = 0; i < players.length; i += 1) {
-    pages.push(browser.newPage());
-  }
+  await Promise.all(
+    players.map((player, i) => {
+      const page = pages[i];
+      return page.goto(KBO_PLAYER_SEARCH_URL + player.name);
+    })
+  );
 
-  pages = await Promise.all(pages);
+  const links = await Promise.all(
+    players.map((currentPlayer, i) => {
+      const searchCompletePage = pages[i];
 
-  const searchPages = [];
-  for (let i = 0; i < players.length; i += 1) {
-    const page = pages[i];
-    searchPages.push(page.goto(KBO_PLAYER_SEARCH_URL + players[i].name));
-  }
+      return (
+        searchCompletePage.evaluate((toBeMatchedPlayer) => {
+          const $rows = document.querySelectorAll(".tEx tBody > tr");
 
-  await Promise.all(searchPages);
+          for (let j = 0; j < $rows.length; j += 1) {
+            const $row = $rows[j];
 
-  let links = [];
-  for (let i = 0; i < players.length; i += 1) {
-    const searchCompletePage = pages[i];
-    const currentPlayer = players[i];
+            const backNumber = $row.children[0].textContent.trim();
+            const name = $row.children[1].textContent.trim();
+            const team = $row.children[2].textContent.trim();
 
-    links.push(searchCompletePage.evaluate((toBeMatchedPlayer) => {
-      const $rows = document.querySelectorAll(".tEx tBody > tr");
+            const isMatched = (
+              backNumber !== "#"
+                && toBeMatchedPlayer.name === name
+                && toBeMatchedPlayer.team === team
+            );
 
-      for (let j = 0; j < $rows.length; j += 1) {
-        const $row = $rows[j];
+            if (isMatched) {
+              return $row.children[1].children[0].href;
+            }
+          }
 
-        const backNumber = $row.children[0].textContent.trim();
-        const name = $row.children[1].textContent.trim();
-        const team = $row.children[2].textContent.trim();
+          return null;
+        }, currentPlayer)
+      );
+    })
+  );
 
-        const isMatched = (
-          backNumber !== "#"
-            && toBeMatchedPlayer.name === name
-            && toBeMatchedPlayer.team === team
-        );
+  await Promise.all(
+    pages.map((page, i) => (
+      page.goto(links[i])
+    ))
+  );
 
-        if (isMatched) {
-          return $row.children[1].children[0].href;
-        }
-      }
+  const playerInfos = await Promise.all(
+    pages.map((page) => (
+      page.evaluate(() => {
+        const playerPhotoUrl = document.querySelector(
+          "#cphContents_cphContents_cphContents_playerProfile_imgProgile"
+        ).src;
 
-      return null;
-    }, currentPlayer));
-  }
+        const $infos = document.querySelectorAll(".player_info li");
+        const backNumber = Number($infos[1].children[1].textContent);
+        const role = $infos[3].children[1].textContent;
 
-  links = await Promise.all(links);
-
-  const playerInfoPage = [];
-  for (let i = 0; i < players.length; i += 1) {
-    const page = pages[i];
-    const collectedLink = links[i];
-    const kboId = collectedLink.replace(/.*playerId=/, "");
-
-    result[i].link = collectedLink;
-    result[i].kboId = kboId;
-
-    playerInfoPage.push(page.goto(collectedLink));
-  }
-
-  await Promise.all(playerInfoPage);
-
-  let playerInfos = [];
-  for (let i = 0; i < players.length; i += 1) {
-    const page = pages[i];
-
-    playerInfos.push(page.evaluate(() => {
-      const playerPhotoUrl = document.querySelector(
-        "#cphContents_cphContents_cphContents_playerProfile_imgProgile"
-      ).src;
-
-      const $infos = document.querySelectorAll(".player_info li");
-      const backNumber = Number($infos[1].children[1].textContent);
-      const role = $infos[3].children[1].textContent;
-
-      return {
-        playerPhotoUrl,
-        backNumber,
-        role,
-      };
-    }));
-  }
-
-  playerInfos = await Promise.all(playerInfos);
+        return {
+          playerPhotoUrl,
+          backNumber,
+          role,
+        };
+      })
+    ))
+  );
 
   for (let i = 0; i < players.length; i += 1) {
     const {
@@ -100,6 +84,11 @@ const crawlPlayersInfo = async (players) => {
       role,
     } = playerInfos[i];
 
+    const collectedLink = links[i];
+    const kboId = collectedLink.replace(/.*playerId=/, "");
+
+    result[i].link = collectedLink;
+    result[i].kboId = kboId;
     result[i].playerPhotoUrl = playerPhotoUrl;
     result[i].backNumber = backNumber;
     result[i].role = role;

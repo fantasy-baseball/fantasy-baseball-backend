@@ -60,12 +60,14 @@ const getPlayersFromEntry = (entry, isHomeTeam, games) => {
     });
   }
 
-  result.push({
-    team: teamName,
-    name: pitcher,
-    position: "투수",
-    playerType: "pitcher",
-  });
+  if (pitcher) {
+    result.push({
+      team: teamName,
+      name: pitcher,
+      position: "투수",
+      playerType: "pitcher",
+    });
+  }
 
   return result;
 };
@@ -78,34 +80,34 @@ const crawlPlayerEntry = async (gameList) => {
 
   const entryResponse = await page.evaluate(async (games) => {
     try {
-      const result = [];
+      const data = await Promise.all(
+        games.map((game) => {
+          const {
+            leagueId,
+            seriesId,
+            seasonId,
+            gameId,
+          } = game;
 
-      for (let i = 0; i < games.length; i += 1) {
-        const {
-          leagueId,
-          seriesId,
-          seasonId,
-          gameId,
-        } = games[i];
-
-        result.push(
-          $.ajax({
-            type: "post",
-            url: "/ws/Schedule.asmx/GetLineUpAnalysis",
-            dataType: "json",
-            data: {
-              leId: leagueId,
-              srId: seriesId,
-              seasonId,
-              gameId,
-            },
-          })
-        );
-      }
+          return (
+            $.ajax({
+              type: "post",
+              url: "/ws/Schedule.asmx/GetLineUpAnalysis",
+              dataType: "json",
+              data: {
+                leId: leagueId,
+                srId: seriesId,
+                seasonId,
+                gameId,
+              },
+            })
+          );
+        })
+      );
 
       return {
         result: true,
-        data: await Promise.all(result),
+        data,
       };
     } catch (err) {
       return {
