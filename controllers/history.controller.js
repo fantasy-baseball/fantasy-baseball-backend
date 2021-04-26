@@ -1,7 +1,9 @@
 const createError = require("http-errors");
 const User = require("../models/User");
+const Player = require("../models/Player");
 const UserBettingData = require("../models/UserBettingData");
 const { PLAYER_POSITION } = require("../constants/game");
+const Statistic = require("../models/Statistic");
 
 exports.getUserRankings = async (req, res, next) => {
   try {
@@ -18,11 +20,8 @@ exports.getUserRankings = async (req, res, next) => {
       })
       .lean();
 
-    if (userRankings === null) {
-      res.status(404).json({
-        result: "none",
-        data: [],
-      });
+    if (userRankings.length === 0) {
+      next(createError(404, "Can't find userRankings"));
       return;
     }
 
@@ -32,6 +31,74 @@ exports.getUserRankings = async (req, res, next) => {
     });
   } catch (err) {
     next(createError(500, "Fail to get userRankings"));
+  }
+};
+
+exports.getPlayerRankings = async (req, res, next) => {
+  try {
+    const gameDate = req.params.game_date;
+    const playerRankings = await Statistic
+      .aggregate([
+        {
+          $match: {
+            gameDate,
+          },
+        },
+        {
+          $lookup: {
+            from: "players",
+            localField: "playerId",
+            foreignField: "_id",
+            as: "playerInfo",
+          },
+        },
+        {
+          $sort: {
+            score: -1,
+          },
+        },
+        {
+          $group: {
+            _id: "$playerType",
+            players: {
+              $push: {
+                name: "$name",
+                team: "$team",
+                score: "$score",
+                users: "$users",
+                position: "$position",
+                playerInfo: "$playerInfo",
+              },
+            },
+          },
+        },
+      ]);
+
+    if (playerRankings.length === 0) {
+      next(createError(404, "Can't find playerRankings"));
+      return;
+    }
+
+    let hitterRankings;
+    let pitcherRankings;
+
+    playerRankings.forEach((playerType) => {
+      if (playerType._id === "pitcher") {
+        pitcherRankings = playerType.players;
+        return;
+      }
+      hitterRankings = playerType.players;
+    });
+
+    res.status(200).json({
+      result: "ok",
+      data: {
+        hitters: hitterRankings,
+        pitchers: pitcherRankings,
+      },
+    });
+  } catch (err) {
+    next(createError(500, "Fail to get playerRankings"));
   }
 };
 
