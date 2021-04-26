@@ -12,6 +12,7 @@ router.post("/:game_date/betting", authenticateUser, gamesController.postBetting
 
 router.get("/:game_date/rankings/users", historyController.getUserRankings);
 router.get("/:game_date/rankings/positions", historyController.getPositionRankings);
+router.get("/:game_date/rankings/players", historyController.getPlayerRankings);
 router.get("/:game_date/roaster", authenticateUser, historyController.getRoaster);
 
 module.exports = router;
