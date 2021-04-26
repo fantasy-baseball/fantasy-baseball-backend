@@ -7,10 +7,11 @@ const router = express.Router();
 
 router.get("/:game_date/schedule", gamesController.getSchedule);
 router.get("/:game_date/players", gamesController.getPlayers);
-router.get("/:game_date/betting", gamesController.getBettingData);
+router.get("/:game_date/betting", gamesController.getBettingStatus);
 router.post("/:game_date/betting", authenticateUser, gamesController.postBetting);
 
 router.get("/:game_date/rankings/users", historyController.getUserRankings);
 router.get("/:game_date/roaster", authenticateUser, historyController.getRoaster);
+router.get("/betting-history", authenticateUser, historyController.getBettingHistory);
 
 module.exports = router;
