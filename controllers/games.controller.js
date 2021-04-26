@@ -31,7 +31,7 @@ exports.getSchedule = async (req, res, next) => {
 exports.getPlayers = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
-    const { players } = (await Game
+    const { players } = await Game
       .findOne(
         { gameDate },
         "players"
@@ -41,12 +41,12 @@ exports.getPlayers = async (req, res, next) => {
         populate: {
           path: "statistics",
           match: {
-            gameDate
+            gameDate,
           },
           select: "position",
-        }
+        },
       })
-      .lean());
+      .lean();
 
     if (!players) {
       res.status(404).json({
