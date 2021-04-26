@@ -66,26 +66,19 @@ const crawlGameSchedule = async (dateNumber) => {
     throw new Error(gameListResponse.message);
   }
 
-  const gameList = gameListResponse.data.map((game) => {
-    const homePitcher = game.B_PIT_P_NM || game.B_D_PIT_P_NM;
-    const awayPitcher = game.T_PIT_P_NM || game.T_D_PIT_P_NM;
-
-    const gameInfo = {
-      gameId: game.G_ID,
-      leagueId: game.LE_ID,
-      seriesId: game.SR_ID,
-      seasonId: game.SEASON_ID,
-      date: game.G_DT,
-      time: game.G_TM,
-      stadium: game.S_NM,
-      home: game.HOME_NM,
-      away: game.AWAY_NM,
-      homePitcher: homePitcher.trim(),
-      awayPitcher: awayPitcher.trim(),
-    };
-
-    return gameInfo;
-  });
+  const gameList = gameListResponse.data.map((game) => ({
+    gameId: game.G_ID,
+    leagueId: game.LE_ID,
+    seriesId: game.SR_ID,
+    seasonId: game.SEASON_ID,
+    date: game.G_DT,
+    time: game.G_TM,
+    stadium: game.S_NM,
+    home: game.HOME_NM,
+    away: game.AWAY_NM,
+    homePitcher: (game.B_PIT_P_NM || "").trim(),
+    awayPitcher: (game.T_PIT_P_NM || "").trim(),
+  }));
 
   await browser.close();
 
