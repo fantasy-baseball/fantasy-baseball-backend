@@ -14,7 +14,7 @@ exports.getUserRankings = async (req, res, next) => {
       .sort({ rank: 1 })
       .populate({
         path: "user",
-        select: "name email",
+        select: "name email imageUrl",
       })
       .lean();
 
