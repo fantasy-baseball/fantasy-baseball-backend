@@ -12,10 +12,10 @@ exports.getSchedule = async (req, res, next) => {
     const game = await Game.findOne({ gameDate }).lean();
 
     if (!game) {
-      next(createError(
-        404,
-        "Can't find Game that corresponds to the game_date"
-      ));
+      res.status(404).json({
+        result: "none",
+        data: [],
+      });
       return;
     }
 
@@ -31,42 +31,43 @@ exports.getSchedule = async (req, res, next) => {
 exports.getPlayers = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
-    const game = await Game.findOne({ gameDate })
-      .populate("players")
-      .lean();
+    const { players } = (await Game
+      .findOne(
+        { gameDate },
+        "players"
+      )
+      .populate({
+        path: "players",
+        populate: {
+          path: "statistics",
+          match: {
+            gameDate
+          },
+          select: "position",
+        }
+      })
+      .lean());
 
-    if (!game) {
-      next(createError(
-        404,
-        "Can't find Game that corresponds to the game_date"
-      ));
+    if (!players) {
+      res.status(404).json({
+        result: "none",
+        data: [],
+      });
       return;
     }
 
-    let statistics = [];
-    const { players } = game;
-    for (let i = 0; i < players.length; i += 1) {
-      const playerId = players[i]._id;
+    const playersWithPosition = players.map((player) => {
+      const { position } = player.statistics[0];
+      const { statistics: removed, ...refinedPlayer } = player;
 
-      statistics.push(
-        Statistics.findOne({
-          gameDate,
-          playerId,
-        }).lean()
-      );
-    }
+      refinedPlayer.position = position;
 
-    statistics = await Promise.all(statistics);
-
-    for (let i = 0; i < players.length; i += 1) {
-      const player = players[i];
-      const { position } = statistics[i];
-      player.position = position;
-    }
+      return refinedPlayer;
+    });
 
     res.status(200).json({
       result: "ok",
-      data: players,
+      data: playersWithPosition,
     });
   } catch (err) {
     next(createError(500, err.message));
