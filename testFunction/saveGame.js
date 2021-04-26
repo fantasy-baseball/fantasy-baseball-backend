@@ -5,7 +5,7 @@ const Game = require("../models/Game");
 const Player = require("../models/Player");
 const Statistic = require("../models/Statistic");
 
-module.exports = async (dateNumber) => {
+const saveGame = async (dateNumber) => {
   let dateString = dateNumber;
   if (typeof dateString !== "string") {
     dateString = dateNumber.toString();
@@ -57,13 +57,17 @@ module.exports = async (dateNumber) => {
     let newStatistics = [];
     for (let i = 0; i < playersWithInfo.length; i += 1) {
       const {
+        name,
+        team,
         position,
         playerType,
       } = playersWithInfo[i];
 
       newStatistics.push(Statistic.create({
-        playerType,
+        name,
+        team,
         position,
+        playerType,
         gameDate: dateString,
       }));
     }
@@ -91,7 +95,7 @@ module.exports = async (dateNumber) => {
 
       statisticsWithPlayerId.push(
         newStatistic.updateOne(
-          { player: playerId }
+          { playerId }
         )
       );
     }
@@ -121,10 +125,12 @@ module.exports = async (dateNumber) => {
   }
 };
 
+module.exports = saveGame;
+
 /*
 in app.js
 
-const saveGame = require("./testTrigger/saveGame");
+const saveGame = require("./testFunction/saveGame");
 
 (async () => {
   await saveGame();
