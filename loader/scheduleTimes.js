@@ -1,33 +1,33 @@
 const schedule = require("node-schedule-tz");
 
-const prepareGameTime = new schedule.RecurrenceRule();
-prepareGameTime.dayOfWeek = [0, new schedule.Range(2, 6)];
-prepareGameTime.hour = 4;
-prepareGameTime.minute = 0;
-prepareGameTime.tz = "Asia/Seoul";
+const preparationTime = new schedule.RecurrenceRule();
+preparationTime.dayOfWeek = [0, new schedule.Range(2, 6)];
+preparationTime.hour = 4;
+preparationTime.minute = 0;
+preparationTime.tz = "Asia/Seoul";
 
-exports.prepareGameTime = prepareGameTime;
+exports.preparationTime = preparationTime;
 
-const weekdayOpenGameTime = new schedule.RecurrenceRule();
-weekdayOpenGameTime.dayOfWeek = [new schedule.Range(1, 5)];
-weekdayOpenGameTime.hour = 18;
-weekdayOpenGameTime.minute = 30;
-weekdayOpenGameTime.tz = "Asia/Seoul";
+const weekdayGameOpenTime = new schedule.RecurrenceRule();
+weekdayGameOpenTime.dayOfWeek = [new schedule.Range(1, 5)];
+weekdayGameOpenTime.hour = 18;
+weekdayGameOpenTime.minute = 30;
+weekdayGameOpenTime.tz = "Asia/Seoul";
 
-exports.weekdayOpenGameTime = weekdayOpenGameTime;
+exports.weekdayGameOpenTime = weekdayGameOpenTime;
 
-const saturdayOpenGameTime = new schedule.RecurrenceRule();
-saturdayOpenGameTime.dayOfWeek = [6];
-saturdayOpenGameTime.hour = 17;
-saturdayOpenGameTime.minute = 0;
-saturdayOpenGameTime.tz = "Asia/Seoul";
+const saturdayGameOpenTime = new schedule.RecurrenceRule();
+saturdayGameOpenTime.dayOfWeek = [6];
+saturdayGameOpenTime.hour = 17;
+saturdayGameOpenTime.minute = 0;
+saturdayGameOpenTime.tz = "Asia/Seoul";
 
-exports.saturdayOpenGameTime = saturdayOpenGameTime;
+exports.saturdayGameOpenTime = saturdayGameOpenTime;
 
-const sundayOpenGameTime = new schedule.RecurrenceRule();
-sundayOpenGameTime.dayOfWeek = [0];
-sundayOpenGameTime.hour = 14;
-sundayOpenGameTime.minute = 0;
-sundayOpenGameTime.tz = "Asia/Seoul";
+const sundayGameOpenTime = new schedule.RecurrenceRule();
+sundayGameOpenTime.dayOfWeek = [0];
+sundayGameOpenTime.hour = 14;
+sundayGameOpenTime.minute = 0;
+sundayGameOpenTime.tz = "Asia/Seoul";
 
-exports.sundayOpenGameTime = sundayOpenGameTime;
+exports.sundayGameOpenTime = sundayGameOpenTime;
