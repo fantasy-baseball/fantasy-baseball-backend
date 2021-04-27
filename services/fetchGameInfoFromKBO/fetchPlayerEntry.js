@@ -36,7 +36,7 @@
  */
 
 const puppeteer = require("puppeteer");
-const { KBO_GAME_CENTER_URL } = require("../constants/crawling");
+const { KBO_GAME_CENTER_URL } = require("../../constants/crawling");
 
 const getPlayersFromEntry = (entry, isHomeTeam, games) => {
   const result = [];

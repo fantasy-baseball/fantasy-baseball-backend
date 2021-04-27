@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
-const { KBO_GAME_CENTER_URL } = require("../constants/crawling");
-const makeQueryString = require("./makeQueryString");
-const allSettled = require("./promiseAllSettled");
+const { KBO_GAME_CENTER_URL } = require("../../constants/crawling");
+const makeQueryString = require("../../utils/makeQueryString");
+const allSettled = require("../../utils/promiseAllSettled");
 
 const groupSummaryByPlayers = (gameSummaries) => {
   const result = [];
