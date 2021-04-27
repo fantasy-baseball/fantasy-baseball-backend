@@ -1,5 +1,5 @@
-const getStartingLineUpAndSave = require("./getStartingLineUpAndSave");
-const sendGrouptMail = require("./mail");
+const getStartingLineUpAndSave = require("./fetchStartingLineUpAndSave");
+const sendGrouptMail = require("./sendGroupMail");
 
 module.exports = async () => {
   try {
