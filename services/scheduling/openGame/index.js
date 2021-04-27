@@ -1,9 +1,9 @@
-const crawlStartingLineUpAndSave = require("./crawlStartingLineUpAndSave");
+const getStartingLineUpAndSave = require("./getStartingLineUpAndSave");
 const sendGrouptMail = require("./mail");
 
 module.exports = async () => {
   try {
-    await crawlStartingLineUpAndSave();
+    await getStartingLineUpAndSave();
     await sendGrouptMail();
   } catch (err) {
     console.error(err);
