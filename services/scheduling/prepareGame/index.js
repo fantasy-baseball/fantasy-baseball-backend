@@ -1,7 +1,7 @@
 const { format, subDays } = require("date-fns");
 const Game = require("../../../models/Game");
 
-const crawlGameSchedule = require("../../../utils/crawlGameSchedule");
+const fetchGameSchedule = require("../../fetchGameInfoFromKBO/fetchGameSchedule");
 const {
   calculateBettingMoney,
   sumEarnedMoneyWithUserMoney,
@@ -18,7 +18,7 @@ module.exports = async () => {
       "yyyyMMdd"
     );
 
-    const gameList = await crawlGameSchedule(dateString);
+    const gameList = await fetchGameSchedule(dateString);
     console.log(`${dateString} Today game schedule crawling`);
 
     await Game.create({

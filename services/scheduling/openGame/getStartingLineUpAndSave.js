@@ -2,8 +2,8 @@ const { format } = require("date-fns");
 const Game = require("../../../models/Game");
 const Player = require("../../../models/Player");
 const Statistic = require("../../../models/Statistic");
-const crawlPlayerEntry = require("../../../utils/crawlPlayerEntry");
-const crawlPlayersInfo = require("../../../utils/crawlPlayersInfo");
+const fetchPlayerEntry = require("../../fetchGameInfoFromKBO/fetchPlayerEntry");
+const fetchPlayersInfo = require("../../fetchGameInfoFromKBO/fetchPlayersInfo");
 
 module.exports = async () => {
   try {
@@ -20,12 +20,12 @@ module.exports = async () => {
 
     const { schedule: gameList } = currentGame;
 
-    const players = await crawlPlayerEntry(gameList);
+    const players = await fetchPlayerEntry(gameList);
 
     console.log("get playerEntry");
     console.log(`players ${players.length}`);
 
-    const playersWithInfo = await crawlPlayersInfo(players);
+    const playersWithInfo = await fetchPlayersInfo(players);
 
     console.log("get playersInfo");
 
