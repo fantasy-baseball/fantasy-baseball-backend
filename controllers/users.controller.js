@@ -53,7 +53,7 @@ exports.checkUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         money: user.money,
-        imageUrl: user.image_url,
+        imageUrl: user.imageUrl,
       },
     });
   } catch (err) {

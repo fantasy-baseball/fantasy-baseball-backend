@@ -160,7 +160,7 @@ exports.postBetting = async (req, res, next) => {
   }
 };
 
-exports.getBettingData = async (req, res, next) => {
+exports.getBettingStatus = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
 
