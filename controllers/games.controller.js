@@ -32,7 +32,7 @@ exports.getSchedule = async (req, res, next) => {
 exports.getPlayers = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
-    const { players } = await Game
+    const currentGame = await Game
       .findOne(
         { gameDate },
         "players"
@@ -49,7 +49,17 @@ exports.getPlayers = async (req, res, next) => {
       })
       .lean();
 
-    if (!players) {
+    if (currentGame === null) {
+      res.status(404).json({
+        result: "none",
+        data: "Can't find current game",
+      });
+      return;
+    }
+
+    const { players } = currentGame;
+
+    if (players.length === 0) {
       res.status(404).json({
         result: "none",
         data: [],
@@ -165,6 +175,15 @@ exports.getBettingStatus = async (req, res, next) => {
     const gameDate = req.params.game_date;
 
     const todayGame = await Game.findOne({ gameDate });
+
+    if (todayGame === null) {
+      res.status(404).json({
+        result: "none",
+        message: "Can't find betting status",
+      });
+      return;
+    }
+
     const { userBettingData, totalMoney } = todayGame;
 
     res.status(200).json({
