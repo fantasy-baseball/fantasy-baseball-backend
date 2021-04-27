@@ -4,9 +4,9 @@ const {
   weekdayOpenGame,
   saturdayOpenGame,
   sundayOpenGame,
-} = require("./scheduleTimer");
-const prepageGame = require("./prepareGame");
-const openGame = require("./openGame");
+} = require("./scheduleTimes");
+const prepageGame = require("../services/scheduling/prepareGame");
+const openGame = require("../services/scheduling/openGame");
 
 exports.prepareGameTime = schedule.scheduleJob(prepareGameTime, prepageGame);
 

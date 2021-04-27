@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("./services/scheduling");
+require("./loader/registerSchedule");
 
 const createError = require("http-errors");
 const express = require("express");
