@@ -52,12 +52,20 @@ exports.getPlayers = async (req, res, next) => {
     if (currentGame === null) {
       res.status(404).json({
         result: "none",
-        data: [],
+        data: "Can't find current game",
       });
       return;
     }
 
     const { players } = currentGame;
+
+    if (players.length === 0) {
+      res.status(404).json({
+        result: "none",
+        data: [],
+      });
+      return;
+    }
 
     const playersWithPosition = players.map((player) => {
       const { position } = player.statistics[0];
