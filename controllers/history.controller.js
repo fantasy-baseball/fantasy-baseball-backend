@@ -224,7 +224,6 @@ exports.getBettingHistory = async (req, res, next) => {
       data: userBettingHistory,
     });
   } catch (err) {
-    console.log(err.message);
     next(createError(500, "Fail to get betting history"));
   }
 };
