@@ -50,7 +50,7 @@ const calculateLosingMoneyForWinner = async (winners, gameDate, ratio) => {
   );
 };
 
-const calculateBettingMoney = async (gameDate) => {
+exports.calculateBettingMoney = async (gameDate) => {
   // 1. gameDate와 일치하는 Statistic을 찾음 : $match
   // 2. score 점수로 오름차순 sorting : $sort
   // 3. position 별로 그루핑 : $group
@@ -171,7 +171,7 @@ const calculateBettingMoney = async (gameDate) => {
   console.log("Calculate earned money for betting");
 };
 
-const sumEarnedMoneyWithUserMoney = async (gameDate) => {
+exports.sumEarnedMoneyWithUserMoney = async (gameDate) => {
   const bettingResult = await UserBettingData.find({ gameDate }, "user earnedMoney").lean();
 
   await Promise.all(
@@ -199,7 +199,7 @@ const sumEarnedMoneyWithUserMoney = async (gameDate) => {
   console.log("Add earned money to user money");
 };
 
-const setBettingRankings = async (gameDate) => {
+exports.setBettingRankings = async (gameDate) => {
   const sortingUserBettingData = await UserBettingData
     .find(
       { gameDate },
@@ -237,7 +237,7 @@ const setBettingRankings = async (gameDate) => {
 
 // TODO : 스케쥴링에 함수 추가
 // (async () => {
-//   await calculateBettingMoney("20210420");
-//   await sumEarnedMoneyWithUserMoney("20210420");
-//   await setBettingRankings("20210420");
+  // await calculateBettingMoney("20210420");
+  // await sumEarnedMoneyWithUserMoney("20210420");
+  // await setBettingRankings("20210420");
 // })();
