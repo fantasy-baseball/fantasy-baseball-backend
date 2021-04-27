@@ -1,12 +1,12 @@
 const { format, subDays } = require("date-fns");
-const Game = require("../../models/Game");
+const Game = require("../../../models/Game");
 
-const crawlGameSchedule = require("../../utils/crawlGameSchedule");
+const crawlGameSchedule = require("../../../utils/crawlGameSchedule");
 const {
   calculateBettingMoney,
   sumEarnedMoneyWithUserMoney,
   setBettingRankings,
-} = require("../../utils/calculateBettingMoney");
+} = require("../../../utils/calculateBettingMoney");
 
 module.exports = async () => {
   try {
