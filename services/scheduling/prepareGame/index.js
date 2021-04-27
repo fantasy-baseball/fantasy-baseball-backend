@@ -11,7 +11,7 @@ const {
 module.exports = async () => {
   try {
     const dateString = format(new Date(), "yyyyMMdd");
-    console.log(dateString, "prepageGame");
+    console.log(dateString, "Preparation start");
 
     const yesterdayDateString = format(
       subDays(new Date(), 1),
