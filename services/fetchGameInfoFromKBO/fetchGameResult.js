@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-const { KBO_GAME_CENTER_URL } = require("../../constants/crawling");
+const { KBO_GAME_CENTER_URL } = require("../../constants/kboUrl");
 const makeQueryString = require("../../utils/makeQueryString");
 const allSettled = require("../../utils/promiseAllSettled");
 
