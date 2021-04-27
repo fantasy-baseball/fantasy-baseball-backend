@@ -10,7 +10,7 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
-const connectMongoDB = require("./config/connectMongoDB");
+const connectMongoDB = require("./loader/connectMongoDB");
 
 connectMongoDB();
 
