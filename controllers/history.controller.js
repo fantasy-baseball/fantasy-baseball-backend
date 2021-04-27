@@ -155,3 +155,33 @@ exports.getRoaster = async (req, res, next) => {
     next(createError(500, "Fail to get user roaster"));
   }
 };
+
+exports.getBettingHistory = async (req, res, next) => {
+  try {
+    const { email } = res.locals.profile;
+
+    const { _id: userId } = await User.findOne({ email });
+    const userBettingHistory = await UserBettingData
+      .find({
+        user: userId,
+      })
+      .sort({ gameDate: -1 })
+      .populate({
+        path: "roaster",
+      })
+      .lean();
+
+    if (userBettingHistory.length === 0) {
+      next(createError(404, "Can't find user betting history"));
+      return;
+    }
+
+    res.status(200).json({
+      result: "ok",
+      data: userBettingHistory,
+    });
+  } catch (err) {
+    console.log(err.message);
+    next(createError(500, "Fail to get betting history"));
+  }
+};
