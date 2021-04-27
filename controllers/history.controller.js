@@ -102,6 +102,49 @@ exports.getPlayerRankings = async (req, res, next) => {
   }
 };
 
+exports.getPositionRankings = async (req, res, next) => {
+  try {
+    const gameDate = req.params.game_date;
+    const positionRankings = await Statistic
+      .aggregate([
+        {
+          $match: {
+            gameDate,
+          },
+        },
+        {
+          $sort: {
+            score: -1,
+          },
+        },
+        {
+          $group: {
+            _id: "$position",
+            players: {
+              $push: {
+                name: "$name",
+                team: "$team",
+                score: "$score",
+              },
+            },
+          },
+        },
+      ]);
+
+    if (positionRankings.length === 0) {
+      next(createError(404, "Can't find positionRankings"));
+      return;
+    }
+
+    res.status(200).json({
+      result: "ok",
+      data: positionRankings,
+    });
+  } catch (err) {
+    next(createError(500, "Fail to get positionRankings"));
+  }
+};
+
 exports.getRoaster = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
