@@ -5,8 +5,8 @@ const {
   saturdayGameOpenTime,
   sundayGameOpenTime,
 } = require("./scheduleTimes");
-const prepareGame = require("../services/scheduling/prepareGame");
-const openGame = require("../services/scheduling/openGame");
+const prepareGame = require("../../services/scheduling/prepareGame");
+const openGame = require("../../services/scheduling/openGame");
 
 exports.prepareGameTime = schedule.scheduleJob(preparationTime, prepareGame);
 exports.weekdayOpen = schedule.scheduleJob(weekdayGameOpenTime, openGame);
