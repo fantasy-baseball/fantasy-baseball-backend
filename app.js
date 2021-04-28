@@ -37,11 +37,6 @@ app.use((err, req, res) => {
   res.locals.error = req.app.get("env") === "development" ? err : {};
   res.status(err.status || 500);
 
-  if (err.status === 404) {
-    res.json({ result: "none" });
-    return;
-  }
-
   res.json({ result: "failure" });
 });
 
