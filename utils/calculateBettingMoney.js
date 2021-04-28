@@ -4,7 +4,7 @@ const Game = require("../models/Game");
 const User = require("../models/User");
 const Statistic = require("../models/Statistic");
 const UserBettingData = require("../models/UserBettingData");
-const connectMongoDB = require("../config/connectMongoDB");
+const connectMongoDB = require("../loader/connectMongoDB");
 
 connectMongoDB();
 let session;

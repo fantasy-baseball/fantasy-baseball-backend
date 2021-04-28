@@ -12,11 +12,8 @@ exports.getSchedule = async (req, res, next) => {
     const gameDate = req.params.game_date;
     const game = await Game.findOne({ gameDate }).lean();
 
-    if (!game) {
-      res.status(404).json({
-        result: "none",
-        data: [],
-      });
+    if (game === null) {
+      next(createError(404, "Can't find schedule"));
       return;
     }
 
@@ -50,20 +47,14 @@ exports.getPlayers = async (req, res, next) => {
       .lean();
 
     if (currentGame === null) {
-      res.status(404).json({
-        result: "none",
-        data: "Can't find current game",
-      });
+      next(createError(404, "Can't find players"));
       return;
     }
 
     const { players } = currentGame;
 
     if (players.length === 0) {
-      res.status(404).json({
-        result: "none",
-        data: [],
-      });
+      next(createError(404, "Can't find players"));
       return;
     }
 
