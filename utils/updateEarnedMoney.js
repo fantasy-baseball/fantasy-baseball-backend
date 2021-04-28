@@ -60,20 +60,6 @@ const calculateLosingMoneyForWinner = async (
   } catch (err) {
     console.log(err);
   }
-
-  // await Promise.all(
-  //   winnerList.map((user) => (
-  //     UserBettingData.findOneAndUpdate(
-  //       { gameDate, user: user.id },
-  //       {
-  //         $inc: {
-  //           earnedMoney: user.earnedMoney,
-  //         },
-  //       },
-  //       { session }
-  //     )
-  //   ))
-  // );
 };
 
 module.exports = async (gameDate, session) => {
