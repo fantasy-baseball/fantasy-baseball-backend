@@ -4,42 +4,39 @@ const fetchGameResult = require("../../fetchGameInfoFromKBO/fetchGameResult");
 
 const updatePlayerStatistic = async (records, gameDate, isHitter) => {
   const recordsByRole = Object.entries(records);
-  let result = [];
 
-  for (let i = 0; i < recordsByRole.length; i += 1) {
-    const [player, playerInfo] = recordsByRole[i];
-    const { team, position } = playerInfo;
-    const nameRegex = new RegExp(player);
+  const result = await Promise.all(
+    recordsByRole.map(([player, playerInfo]) => {
+      const { team, position } = playerInfo;
+      const nameRegex = new RegExp(player);
 
-    const toBeUpdatedRecord = isHitter
-      ? {
-        specialRecords: playerInfo.specialRecords,
-        inningRecords: playerInfo.inningRecords,
-        summary: playerInfo.summary,
-      } : {
-        specialRecords: playerInfo.specialRecords,
-        summary: playerInfo.record,
-      };
+      const toBeUpdatedRecord = isHitter
+        ? {
+          specialRecords: playerInfo.specialRecords,
+          inningRecords: playerInfo.inningRecords,
+          summary: playerInfo.summary,
+        } : {
+          specialRecords: playerInfo.specialRecords,
+          summary: playerInfo.record,
+        };
 
-    result.push(
-      Statistic.findOneAndUpdate(
-        {
-          name: { $regex: nameRegex },
-          team,
-          position,
-          gameDate,
-        },
-        {
-          record: toBeUpdatedRecord,
-        }
-      ).lean()
-    );
-  }
+      return (
+        Statistic.findOneAndUpdate(
+          {
+            name: { $regex: nameRegex },
+            team,
+            position,
+            gameDate,
+          },
+          {
+            record: toBeUpdatedRecord,
+          }
+        ).lean()
+      );
+    })
+  );
 
-  result = (await Promise.all(result))
-    .filter((statistic) => !!statistic);
-
-  return result;
+  return result.filter((statistic) => !!statistic);
 };
 
 module.exports = async (gameDate) => {
@@ -128,15 +125,10 @@ module.exports = async (gameDate) => {
       pitchersRecords, gameDate, false
     );
 
-    const gamesWithResult = [];
-    for (let i = 0; i < currentGames.length; i += 1) {
-      const game = currentGames[i];
-      gamesWithResult.push(
-        game.updateOne({ hasResult: true })
-      );
-    }
+    await Promise.all(currentGames.map(
+      (game) => game.updateOne({ hasResult: true })
+    ));
 
-    await Promise.all(gamesWithResult);
     console.log(hitterStatistics.length + pitcherStatistics.length, "players result save");
   } catch (err) {
     console.error(err);
