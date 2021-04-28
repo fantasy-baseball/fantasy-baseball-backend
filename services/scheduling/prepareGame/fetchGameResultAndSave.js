@@ -1,8 +1,9 @@
+const { startSession } = require("mongoose");
 const Game = require("../../../models/Game");
 const Statistic = require("../../../models/Statistic");
 const fetchGameResult = require("../../fetchGameInfoFromKBO/fetchGameResult");
 
-const updatePlayerStatistic = async (records, gameDate, isHitter) => {
+const updatePlayerStatistic = async (records, gameDate, isHitter, session) => {
   const recordsByRole = Object.entries(records);
 
   const result = await Promise.all(
@@ -30,7 +31,8 @@ const updatePlayerStatistic = async (records, gameDate, isHitter) => {
           },
           {
             record: toBeUpdatedRecord,
-          }
+          },
+          { session }
         ).lean()
       );
     })
@@ -40,7 +42,11 @@ const updatePlayerStatistic = async (records, gameDate, isHitter) => {
 };
 
 module.exports = async (gameDate) => {
+  const session = await startSession();
+
   try {
+    session.startTransaction();
+
     const currentGames = await Game.find({ gameDate });
     const gameIds = currentGames
       .flatMap((game) => game.schedule)
@@ -66,7 +72,6 @@ module.exports = async (gameDate) => {
 
     for (let i = 0; i < gameResults.length; i += 1) {
       const { gameSummary, playersRecord } = gameResults[i];
-
       const specialRecordsByPlayer = Object.entries(gameSummary);
 
       for (let j = 0; j < specialRecordsByPlayer.length; j += 1) {
@@ -119,18 +124,31 @@ module.exports = async (gameDate) => {
     }
 
     const hitterStatistics = await updatePlayerStatistic(
-      hittersRecords, gameDate, true
+      hittersRecords,
+      gameDate,
+      true,
+      session
     );
     const pitcherStatistics = await updatePlayerStatistic(
-      pitchersRecords, gameDate, false
+      pitchersRecords,
+      gameDate,
+      false,
+      session
     );
 
     await Promise.all(currentGames.map(
-      (game) => game.updateOne({ hasResult: true })
+      (game) => game.updateOne(
+        { hasResult: true },
+        { session }
+      )
     ));
 
+    await session.commitTransaction();
     console.log(hitterStatistics.length + pitcherStatistics.length, "players result save");
   } catch (err) {
+    await session.abortTransaction();
     console.error(err);
+  } finally {
+    session.endSession();
   }
 };
