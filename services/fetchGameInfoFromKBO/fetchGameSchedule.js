@@ -25,13 +25,13 @@
  * }
  *
  * example:
- * const gameList = await crawlGameSchedule(20210416);
+ * const gameList = await fetchGameSchedule(20210416);
  */
 
 const puppeteer = require("puppeteer");
 const { KBO_GAME_CENTER_URL } = require("../../constants/kboUrl");
 
-const crawlGameSchedule = async (dateNumber) => {
+const fetchGameSchedule = async (dateNumber) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -85,4 +85,4 @@ const crawlGameSchedule = async (dateNumber) => {
   return gameList;
 };
 
-module.exports = crawlGameSchedule;
+module.exports = fetchGameSchedule;
