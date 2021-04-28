@@ -1,5 +1,5 @@
 const createError = require("http-errors");
-const checkBettingOpened = require("../utils/index");
+const checkBettingOpened = require("../utils/checkBettingOpened");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
 const User = require("../models/User");
