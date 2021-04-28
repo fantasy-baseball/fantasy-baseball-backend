@@ -18,7 +18,7 @@ const oauth = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_
 oauth.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const readFile = promisify(fs.readFile);
-const templatePath = path.join(__dirname, "../public/email.html");
+const templatePath = path.join(__dirname, "../../../public/email.html");
 const mails = [];
 
 const sendGrouptMail = async () => {
