@@ -139,7 +139,7 @@ module.exports = async () => {
     await session.commitTransaction();
   } catch (err) {
     await session.abortTransaction();
-    console.log(err);
+    console.error(err);
   } finally {
     session.endSession();
   }
