@@ -1,5 +1,5 @@
-const User = require("../models/User");
-const UserBettingData = require("../models/UserBettingData");
+const User = require("../../../models/User");
+const UserBettingData = require("../../../models/UserBettingData");
 
 module.exports = async (gameDate, session) => {
   try {

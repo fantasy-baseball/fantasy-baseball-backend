@@ -1,4 +1,4 @@
-const Statistic = require("../models/Statistic");
+const Statistic = require("../../../models/Statistic");
 
 const updateScorePercentage = async (position, gameDate) => {
   const statistics = [];

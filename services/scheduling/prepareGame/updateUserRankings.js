@@ -1,4 +1,4 @@
-const UserBettingData = require("../models/UserBettingData");
+const UserBettingData = require("../../../models/UserBettingData");
 
 module.exports = async (gameDate, session) => {
   try {

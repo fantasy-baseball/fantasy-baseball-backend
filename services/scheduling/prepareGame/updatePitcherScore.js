@@ -1,9 +1,9 @@
 const {
   PITCHER_SUMMARY,
   PITCHER_SPECIAL_RECORD,
-} = require("../constants/score");
+} = require("../../../constants/score");
 
-const Statistic = require("../models/Statistic");
+const Statistic = require("../../../models/Statistic");
 
 const {
   Wgs,

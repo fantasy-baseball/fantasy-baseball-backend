@@ -3,9 +3,9 @@ const {
   HITTER_INNING_RECORD_CATEGORY,
   HITTER_SUMMARY,
   RECORD_FILTER,
-} = require("../constants/score");
+} = require("../../../constants/score");
 
-const Statistic = require("../models/Statistic");
+const Statistic = require("../../../models/Statistic");
 
 const {
   PA,

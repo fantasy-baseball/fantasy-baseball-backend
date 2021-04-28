@@ -1,6 +1,6 @@
-const Game = require("../models/Game");
-const Statistic = require("../models/Statistic");
-const UserBettingData = require("../models/UserBettingData");
+const Game = require("../../../models/Game");
+const Statistic = require("../../../models/Statistic");
+const UserBettingData = require("../../../models/UserBettingData");
 
 const updateMoneyForUser = async (users, gameDate, moneyType, session) => {
   await Promise.all(

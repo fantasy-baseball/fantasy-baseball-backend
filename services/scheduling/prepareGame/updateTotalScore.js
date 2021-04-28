@@ -1,5 +1,5 @@
-const Statistic = require("../models/Statistic");
-const Game = require("../models/Game");
+const Statistic = require("../../../models/Statistic");
+const Game = require("../../../models/Game");
 
 const updateTotalScore = async (gameDate, session) => {
   try {
