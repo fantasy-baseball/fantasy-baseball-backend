@@ -2,12 +2,10 @@ const {
   HITTER_SPECIAL_RECORD_CATEGORY,
   HITTER_INNING_RECORD_CATEGORY,
   HITTER_SUMMARY,
-  POSITIONS,
   RECORD_FILTER,
 } = require("../constants/score");
 
 const Statistic = require("../models/Statistic");
-const updateScorePercentage = require("./updateScorePercentage");
 
 const {
   PA,
@@ -161,27 +159,34 @@ const calculateHitterScore = (record) => {
   return score;
 };
 
-const updateHitterScore = async (gameDate) => {
-  const hitters = await Statistic.find({
-    gameDate,
-    playerType: "hitter",
-  }).lean();
+const updateHitterScore = async (gameDate, session) => {
+  try {
+    const hitters = await Statistic
+      .find({
+        gameDate,
+        playerType: "hitter",
+      })
+      .lean();
 
-  const statistics = [];
+    await Promise.all(
+      hitters.map((hitter) => {
+        const { record, _id } = hitter;
+        const score = calculateHitterScore(record);
 
-  for (let i = 0; i < hitters.length; i += 1) {
-    const { record, _id } = hitters[i];
-    const score = calculateHitterScore(record);
-
-    statistics.push(
-      Statistic.findOneAndUpdate({ _id }, { score })
+        return (
+          Statistic.findOneAndUpdate(
+            { _id },
+            { score },
+            { session }
+          )
+        );
+      })
     );
-  }
 
-  await Promise.all(statistics);
-
-  for (let i = 0; i < POSITIONS.length; i += 1) {
-    updateScorePercentage(POSITIONS[i], gameDate);
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
   }
 };
 

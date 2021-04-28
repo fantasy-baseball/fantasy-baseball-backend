@@ -4,7 +4,6 @@ const {
 } = require("../constants/score");
 
 const Statistic = require("../models/Statistic");
-const updateScorePercentage = require("./updateScorePercentage");
 
 const {
   Wgs,
@@ -103,26 +102,31 @@ const calculatePitcherScore = (record) => {
   return score;
 };
 
-const updatePitcherScore = async (gameDate) => {
-  const pitchers = await Statistic.find({
-    gameDate,
-    playerType: "pitcher",
-  }).lean();
+const updatePitcherScore = async (gameDate, session) => {
+  try {
+    const pitchers = await Statistic.find({
+      gameDate,
+      playerType: "pitcher",
+    }).lean();
 
-  const statistics = [];
+    await Promise.all(
+      pitchers.map((pitcher) => {
+        const { record, _id } = pitcher;
+        const score = calculatePitcherScore(record);
 
-  for (let i = 0; i < pitchers.length; i += 1) {
-    const { record, _id } = pitchers[i];
-    const score = calculatePitcherScore(record);
-
-    statistics.push(
-      Statistic.findOneAndUpdate({ _id }, { score })
+        return Statistic.findOneAndUpdate(
+          { _id },
+          { score },
+          { session }
+        );
+      })
     );
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
   }
-
-  await Promise.all(statistics);
-
-  updateScorePercentage("투수", gameDate);
 };
 
 module.exports = updatePitcherScore;
