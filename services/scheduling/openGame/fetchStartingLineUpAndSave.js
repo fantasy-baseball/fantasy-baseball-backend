@@ -1,3 +1,4 @@
+const { startSession } = require("mongoose");
 const { format } = require("date-fns");
 const Game = require("../../../models/Game");
 const Player = require("../../../models/Player");
@@ -6,28 +7,43 @@ const fetchPlayerEntry = require("../../fetchGameInfoFromKBO/fetchPlayerEntry");
 const fetchPlayersInfo = require("../../fetchGameInfoFromKBO/fetchPlayersInfo");
 
 module.exports = async () => {
+  const session = await startSession();
+
   try {
+    session.startTransaction();
+
     const dateString = format(new Date(), "yyyyMMdd");
 
     const currentGame = await Game
-      .findOne({ gameDate: dateString }, "schedule");
+      .findOne(
+        { gameDate: dateString },
+        "schedule",
+        { session }
+      );
 
     console.log(`Load ${dateString} game`);
 
     if (currentGame.schedule.length === 0) {
-      throw new Error("there is no game schedule");
+      throw new Error("fetch error : there is no game schedule");
     }
 
     const { schedule: gameList } = currentGame;
 
     const players = await fetchPlayerEntry(gameList);
+    if (players.length === 0) {
+      throw new Error("fetch error : there is no players");
+    }
 
     console.log("get playerEntry");
     console.log(`players ${players.length}`);
 
     const playersWithInfo = await fetchPlayersInfo(players);
+    if (playersWithInfo.length === 0) {
+      throw new Error("fetch error : there is no player informations");
+    }
 
     console.log("get playersInfo");
+    console.log(`playersInfo ${playersWithInfo.length}`);
 
     const newPlayers = await Promise.all(
       playersWithInfo.map((player) => (
@@ -45,6 +61,7 @@ module.exports = async () => {
           {
             new: true,
             upsert: true,
+            session,
           }
         )
       ))
@@ -71,6 +88,7 @@ module.exports = async () => {
           {
             new: true,
             upsert: true,
+            session,
           }
         )
       ))
@@ -92,13 +110,15 @@ module.exports = async () => {
             $push: {
               statistics: statisticsId,
             }
-          }
+          },
+          { session }
         )
       );
 
       statisticsWithPlayerId.push(
         newStatistic.updateOne(
-          { playerId }
+          { playerId },
+          { session }
         )
       );
     }
@@ -106,13 +126,21 @@ module.exports = async () => {
     await Promise.all(playersWithStatisticId);
     await Promise.all(statisticsWithPlayerId);
 
-    await currentGame.updateOne({
-      players: playerIds,
-      isOpened: true,
-    });
+    await currentGame.updateOne(
+      {
+        players: playerIds,
+        isOpened: true,
+      },
+      { session }
+    );
 
     console.log("open game complete");
+
+    await session.commitTransaction();
+    session.endSession();
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     console.log(err);
   }
 };
