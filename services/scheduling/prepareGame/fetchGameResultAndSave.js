@@ -145,9 +145,13 @@ module.exports = async (gameDate) => {
 
     await session.commitTransaction();
     console.log(hitterStatistics.length + pitcherStatistics.length, "players result save");
+
+    return true;
   } catch (err) {
     await session.abortTransaction();
     console.error(err);
+
+    return false;
   } finally {
     session.endSession();
   }

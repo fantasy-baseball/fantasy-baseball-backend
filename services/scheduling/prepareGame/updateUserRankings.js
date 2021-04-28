@@ -47,7 +47,9 @@ module.exports = async (gameDate, session) => {
     );
 
     console.log("updateUserRankings end");
+    return true;
   } catch (err) {
     console.error(err);
+    return false;
   }
 };

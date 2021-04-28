@@ -197,7 +197,9 @@ module.exports = async (gameDate, session) => {
     await updateMoneyForUser(secondWinnerList, gameDate, "earnedMoney", session);
 
     console.log("updateEarnedMoney ended");
+    return true;
   } catch (err) {
     console.error(err);
+    return false;
   }
 };
