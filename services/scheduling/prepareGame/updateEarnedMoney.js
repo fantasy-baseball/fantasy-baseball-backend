@@ -1,6 +1,7 @@
 const Game = require("../../../models/Game");
 const Statistic = require("../../../models/Statistic");
 const UserBettingData = require("../../../models/UserBettingData");
+const logger = require("../../../config/winston");
 
 const updateMoneyForUser = async (users, gameDate, moneyType, session) => {
   await Promise.all(
@@ -58,7 +59,7 @@ const calculateLosingMoneyForWinner = async (
 
     return winnerList;
   } catch (err) {
-    console.log(err);
+    logger.log(err);
   }
 };
 
@@ -67,6 +68,9 @@ module.exports = async (gameDate, session) => {
   // 2. score 점수로 오름차순 sorting : $sort
   // 3. position 별로 그루핑 : $group
   //    - "totalBettingMoney"의 값이 0 이상인 선수들만 $push
+
+  logger.info("Start: update earned money");
+
   try {
     const statisticsPerPosition = await Statistic
       .aggregate([
@@ -196,10 +200,11 @@ module.exports = async (gameDate, session) => {
     await updateMoneyForUser(firstWinnerList, gameDate, "earnedMoney", session);
     await updateMoneyForUser(secondWinnerList, gameDate, "earnedMoney", session);
 
-    console.log("updateEarnedMoney ended");
+    logger.info("Success: update earned money");
+
     return true;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return false;
   }
 };

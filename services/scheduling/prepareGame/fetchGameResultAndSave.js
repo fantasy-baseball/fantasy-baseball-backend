@@ -2,6 +2,7 @@ const { startSession } = require("mongoose");
 const Game = require("../../../models/Game");
 const Statistic = require("../../../models/Statistic");
 const fetchGameResult = require("../../fetchGameInfoFromKBO/fetchGameResult");
+const logger = require("../../../config/winston");
 
 const updatePlayerStatistic = async (records, gameDate, isHitter, session) => {
   const recordsByRole = Object.entries(records);
@@ -42,6 +43,8 @@ const updatePlayerStatistic = async (records, gameDate, isHitter, session) => {
 };
 
 module.exports = async (gameDate) => {
+  logger.info("Start: fetch game result and save");
+
   const session = await startSession();
 
   try {
@@ -53,6 +56,8 @@ module.exports = async (gameDate) => {
       .map((schedule) => schedule.gameId);
 
     const gameResults = await fetchGameResult(gameIds);
+    logger.info(`Log: fetch ${gameDate} game result`);
+
     const hittersRecords = {};
     const pitchersRecords = {};
 
@@ -129,12 +134,15 @@ module.exports = async (gameDate) => {
       true,
       session
     );
+    logger.info(`Log: save ${hitterStatistics.length} hitter statistic`);
+
     const pitcherStatistics = await updatePlayerStatistic(
       pitchersRecords,
       gameDate,
       false,
       session
     );
+    logger.info(`Log: save ${pitcherStatistics.length} pitcher statistic`);
 
     await Promise.all(currentGames.map(
       (game) => game.updateOne(
@@ -144,12 +152,12 @@ module.exports = async (gameDate) => {
     ));
 
     await session.commitTransaction();
-    console.log(hitterStatistics.length + pitcherStatistics.length, "players result save");
+    logger.info(`Success: ${hitterStatistics.length + pitcherStatistics.length} player results are saved`);
 
     return true;
   } catch (err) {
     await session.abortTransaction();
-    console.error(err);
+    logger.error(err);
 
     return false;
   } finally {

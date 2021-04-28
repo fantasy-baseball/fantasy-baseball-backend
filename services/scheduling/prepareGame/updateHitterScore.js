@@ -4,8 +4,8 @@ const {
   HITTER_SUMMARY,
   RECORD_FILTER,
 } = require("../../../constants/score");
-
 const Statistic = require("../../../models/Statistic");
+const logger = require("../../../config/winston");
 
 const {
   PA,
@@ -161,6 +161,8 @@ const calculateHitterScore = (record) => {
 
 const updateHitterScore = async (gameDate, session) => {
   try {
+    logger.info("Start: update hitter score");
+
     const hitters = await Statistic
       .find({
         gameDate,
@@ -183,9 +185,10 @@ const updateHitterScore = async (gameDate, session) => {
       })
     );
 
+    logger.info("Success: update hitter score");
     return true;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return false;
   }
 };

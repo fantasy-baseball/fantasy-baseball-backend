@@ -5,8 +5,11 @@ const Player = require("../../../models/Player");
 const Statistic = require("../../../models/Statistic");
 const fetchPlayerEntry = require("../../fetchGameInfoFromKBO/fetchPlayerEntry");
 const fetchPlayersInfo = require("../../fetchGameInfoFromKBO/fetchPlayersInfo");
+const logger = require("../../../config/winston");
 
 module.exports = async () => {
+  logger.info("Start: fetch starting line up and save");
+
   const session = await startSession();
 
   try {
@@ -21,29 +24,27 @@ module.exports = async () => {
         { session }
       );
 
-    console.log(`Load ${dateString} game`);
+    logger.info(`Log: load ${dateString} game`);
 
     if (currentGame.schedule.length === 0) {
-      throw new Error("fetch error : there is no game schedule");
+      throw new Error("Error: there is no game schedule");
     }
 
     const { schedule: gameList } = currentGame;
 
     const players = await fetchPlayerEntry(gameList);
     if (players.length === 0) {
-      throw new Error("fetch error : there is no players");
+      throw new Error("Error: there is no players");
     }
 
-    console.log("get playerEntry");
-    console.log(`players ${players.length}`);
+    logger.info(`Log: fetch ${players.length} players`);
 
     const playersWithInfo = await fetchPlayersInfo(players);
     if (playersWithInfo.length === 0) {
-      throw new Error("fetch error : there is no player informations");
+      throw new Error("Error : there is no player informations");
     }
 
-    console.log("get playersInfo");
-    console.log(`playersInfo ${playersWithInfo.length}`);
+    logger.info(`Log: fetch ${playersWithInfo.length} player informations`);
 
     const newPlayers = await Promise.all(
       playersWithInfo.map((player) => (
@@ -126,6 +127,8 @@ module.exports = async () => {
     await Promise.all(playersWithStatisticId);
     await Promise.all(statisticsWithPlayerId);
 
+    logger.info("Log: save players");
+
     await currentGame.updateOne(
       {
         players: playerIds,
@@ -134,12 +137,12 @@ module.exports = async () => {
       { session }
     );
 
-    console.log("open game complete");
+    logger.info("Success: fetch starting line up and save");
 
     await session.commitTransaction();
   } catch (err) {
     await session.abortTransaction();
-    console.error(err);
+    logger.error(err);
   } finally {
     session.endSession();
   }

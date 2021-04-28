@@ -2,8 +2,8 @@ const {
   PITCHER_SUMMARY,
   PITCHER_SPECIAL_RECORD,
 } = require("../../../constants/score");
-
 const Statistic = require("../../../models/Statistic");
+const logger = require("../../../config/winston");
 
 const {
   Wgs,
@@ -104,6 +104,8 @@ const calculatePitcherScore = (record) => {
 
 const updatePitcherScore = async (gameDate, session) => {
   try {
+    logger.info("Start: update pitcher score");
+
     const pitchers = await Statistic.find({
       gameDate,
       playerType: "pitcher",
@@ -122,9 +124,11 @@ const updatePitcherScore = async (gameDate, session) => {
       })
     );
 
+    logger.info("Success: update pitcher score");
+
     return true;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return false;
   }
 };

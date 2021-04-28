@@ -1,12 +1,15 @@
 const Game = require("../../../models/Game");
 const fetchGameSchedule = require("../../fetchGameInfoFromKBO/fetchGameSchedule");
+const logger = require("../../../config/winston");
 
 module.exports = async (dateString) => {
   try {
-    console.log(dateString, "Preparation start");
+    logger.info("Start: fetch game schedule and save");
 
     const gameList = await fetchGameSchedule(dateString);
-    console.log(`${dateString} Today game schedule crawling`);
+    logger.info(
+      `Log: fetch ${dateString} game schedule, game: ${gameList.length}`
+    );
 
     await Game.create({
       gameDate: dateString,
@@ -14,8 +17,9 @@ module.exports = async (dateString) => {
       createdAt: new Date(),
     });
 
-    console.log(`${dateString} Game document is created`);
+    logger.info(`Log: ${dateString} Game document is created`);
+    logger.info("Success: fetch game schedule and save");
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };

@@ -1,11 +1,16 @@
-const getStartingLineUpAndSave = require("./fetchStartingLineUpAndSave");
+const fetchStartingLineUpAndSave = require("./fetchStartingLineUpAndSave");
 const sendGrouptMail = require("./sendGroupMail");
+const logger = require("../../../config/winston");
 
 module.exports = async () => {
   try {
-    await getStartingLineUpAndSave();
+    logger.info("Start: open game");
+
+    await fetchStartingLineUpAndSave();
     await sendGrouptMail();
+
+    logger.info("End: open game");
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };

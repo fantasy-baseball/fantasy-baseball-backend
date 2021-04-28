@@ -8,6 +8,7 @@ const updateTotalScore = require("./updateTotalScore");
 const updateEarnedMoney = require("./updateEarnedMoney");
 const updateUserMoney = require("./updateUserMoney");
 const updateUserRankings = require("./updateUserRankings");
+const logger = require("../../../config/winston");
 
 module.exports = async () => {
   try {
@@ -17,16 +18,14 @@ module.exports = async () => {
       "yyyyMMdd"
     );
 
-    console.log("Start game preparation");
+    logger.info(`Start: prepare ${dateString} game`);
 
     await fetchGameScheduleAndSave(dateString);
 
     const isFetchGameResultComplete = await fetchGameResultAndSave(yesterdayDateString);
     if (!isFetchGameResultComplete) {
-      console.error("Failure: fetch game result");
       return;
     }
-    console.log("fetch today schedule, yesterday result");
 
     const updateScoreSession = await startSession();
     updateScoreSession.startTransaction();
@@ -44,8 +43,6 @@ module.exports = async () => {
     }
     updateScoreSession.endSession();
 
-    console.log(`update score, result: ${isUpdateScoreComplete}`);
-
     const updateUserSession = await startSession();
     updateUserSession.startTransaction();
 
@@ -62,8 +59,8 @@ module.exports = async () => {
     }
     updateUserSession.endSession();
 
-    console.log(`update money, result: ${isUpdateUserComplete}`);
+    logger.info("End: prepare game");
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };

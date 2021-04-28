@@ -1,8 +1,11 @@
 const User = require("../../../models/User");
 const UserBettingData = require("../../../models/UserBettingData");
+const logger = require("../../../config/winston");
 
 module.exports = async (gameDate, session) => {
   try {
+    logger.info("Start: update user money");
+
     const bettingResult = await UserBettingData
       .find(
         { gameDate },
@@ -34,10 +37,11 @@ module.exports = async (gameDate, session) => {
       ))
     );
 
-    console.log("updateUserMoney ended");
+    logger.info("Success: update user money");
+
     return true;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return false;
   }
 };

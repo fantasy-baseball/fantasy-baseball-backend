@@ -1,8 +1,11 @@
 const Statistic = require("../../../models/Statistic");
 const Game = require("../../../models/Game");
+const logger = require("../../../config/winston");
 
 const updateTotalScore = async (gameDate, session) => {
   try {
+    logger.info("Start: update total score");
+
     const playerScores = await Statistic.find({
       gameDate,
     }, "score").lean();
@@ -19,9 +22,10 @@ const updateTotalScore = async (gameDate, session) => {
       { session }
     );
 
+    logger.info("Success: update total score");
     return true;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return false;
   }
 };
