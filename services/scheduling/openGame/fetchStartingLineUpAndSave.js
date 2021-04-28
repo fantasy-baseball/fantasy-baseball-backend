@@ -137,10 +137,10 @@ module.exports = async () => {
     console.log("open game complete");
 
     await session.commitTransaction();
-    session.endSession();
   } catch (err) {
     await session.abortTransaction();
-    session.endSession();
     console.log(err);
+  } finally {
+    session.endSession();
   }
 };
