@@ -2,7 +2,6 @@ const createError = require("http-errors");
 const checkBettingOpened = require("../utils/index");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
-const Statistics = require("../models/Statistic");
 const User = require("../models/User");
 const UserBettingData = require("../models/UserBettingData");
 const Statistic = require("../models/Statistic");
@@ -85,10 +84,7 @@ exports.postBetting = async (req, res, next) => {
     const isBettingOpened = checkBettingOpened(new Date());
 
     if (isBettingOpened === false) {
-      res.status(403).json({
-        result: "close",
-        message: "Betting is closed",
-      });
+      next(createError(401, "Betting is closed"));
       return;
     }
 
@@ -98,10 +94,7 @@ exports.postBetting = async (req, res, next) => {
       .findOne({ gameDate, user: user._id });
 
     if (userBettingData) {
-      res.status(409).json({
-        result: "duplicate",
-        message: "Can't save user play data because data already exists",
-      });
+      next(createError(409, "Can't save user play data because data already exists"));
       return;
     }
 
@@ -165,17 +158,14 @@ exports.getBettingStatus = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
 
-    const todayGame = await Game.findOne({ gameDate });
+    const currentGame = await Game.findOne({ gameDate });
 
-    if (todayGame === null) {
-      res.status(404).json({
-        result: "none",
-        message: "Can't find betting status",
-      });
+    if (currentGame === null) {
+      next(createError(404, "Can't find betting status"));
       return;
     }
 
-    const { userBettingData, totalMoney } = todayGame;
+    const { userBettingData, totalMoney } = currentGame;
 
     res.status(200).json({
       result: "ok",

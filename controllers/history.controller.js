@@ -1,6 +1,5 @@
 const createError = require("http-errors");
 const User = require("../models/User");
-const Player = require("../models/Player");
 const UserBettingData = require("../models/UserBettingData");
 const { PLAYER_POSITION } = require("../constants/game");
 const Statistic = require("../models/Statistic");
@@ -141,7 +140,7 @@ exports.getPositionRankings = async (req, res, next) => {
       data: positionRankings,
     });
   } catch (err) {
-    next(createError(500, "Fail to get positionRankings"));
+    next(createError(500, "Fail to get position rankings"));
   }
 };
 
@@ -153,7 +152,10 @@ exports.getRoaster = async (req, res, next) => {
     const user = await User.findOne({ email });
     const bettingData = await UserBettingData
       .findOne(
-        { gameDate, user: user._id },
+        {
+          gameDate,
+          user: user._id
+        },
         "roaster"
       )
       .populate({
@@ -170,10 +172,7 @@ exports.getRoaster = async (req, res, next) => {
       .lean();
 
     if (bettingData === null) {
-      res.status(404).json({
-        result: "none",
-        data: [],
-      });
+      next(createError(404, "Can't find roaster"));
       return;
     }
 
