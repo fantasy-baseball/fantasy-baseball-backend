@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("./services");
+require("./loader/registerSchedule");
 
 const createError = require("http-errors");
 const express = require("express");
@@ -10,12 +10,7 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const gameRouter = require("./routes/games");
 
-// TODO: 이메일 스케쥴링 작업 필요
-// const sendGrouptMail = require("./services/mail");
-
-// sendGrouptMail();
-
-const connectMongoDB = require("./config/connectMongoDB");
+const connectMongoDB = require("./loader/connectMongoDB");
 
 connectMongoDB();
 

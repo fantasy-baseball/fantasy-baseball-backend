@@ -3,7 +3,7 @@ const { promisify } = require("util");
 const path = require("path");
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
-const User = require("../models/User");
+const User = require("../../../models/User");
 
 const {
   GOOGLE_CLIENT_ID,

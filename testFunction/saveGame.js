@@ -63,13 +63,25 @@ const saveGame = async (dateNumber) => {
         playerType,
       } = playersWithInfo[i];
 
-      newStatistics.push(Statistic.create({
-        name,
-        team,
-        position,
-        playerType,
-        gameDate: dateString,
-      }));
+      newStatistics.push(Statistic.findOneAndUpdate(
+        {
+          team,
+          name,
+          position,
+          gameDate: dateString
+        },
+        {
+          name,
+          team,
+          position,
+          playerType,
+          gameDate: dateString,
+        },
+        {
+          new: true,
+          upsert: true,
+        }
+      ));
     }
 
     newStatistics = await Promise.all(newStatistics);

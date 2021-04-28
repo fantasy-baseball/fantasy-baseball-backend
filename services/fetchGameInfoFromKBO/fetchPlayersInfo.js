@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-const { KBO_PLAYER_SEARCH_URL } = require("../constants/crawling");
+const { KBO_PLAYER_SEARCH_URL } = require("../../constants/kboUrl");
 
 const crawlPlayersInfo = async (players) => {
   const result = [];
