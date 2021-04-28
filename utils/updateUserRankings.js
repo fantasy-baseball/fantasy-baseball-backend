@@ -46,8 +46,8 @@ module.exports = async (gameDate, session) => {
       ))
     );
 
-    console.log("sumBettingRankings end");
+    console.log("updateUserRankings end");
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };

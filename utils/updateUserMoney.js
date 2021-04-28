@@ -34,8 +34,8 @@ module.exports = async (gameDate, session) => {
       ))
     );
 
-    console.log("sumEarnedMoneyWithUserMoney ended");
+    console.log("updateUserMoney ended");
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
