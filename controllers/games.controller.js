@@ -300,6 +300,11 @@ exports.getPositionRankings = async (req, res, next) => {
                 name: "$name",
                 team: "$team",
                 score: "$score",
+                users: {
+                  $size: {
+                    $ifNull: ["$users", []]
+                  },
+                },
               },
             },
           },
@@ -316,6 +321,7 @@ exports.getPositionRankings = async (req, res, next) => {
       data: positionRankings,
     });
   } catch (err) {
+    console.log(err);
     next(createError(500, "Fail to get position rankings"));
   }
 };

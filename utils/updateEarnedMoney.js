@@ -1,12 +1,6 @@
-require("dotenv").config();
-const { startSession } = require("mongoose");
 const Game = require("../models/Game");
-const User = require("../models/User");
 const Statistic = require("../models/Statistic");
 const UserBettingData = require("../models/UserBettingData");
-const connectMongoDB = require("../loader/connectMongoDB");
-
-connectMongoDB();
 
 const updateMoneyForUser = async (users, gameDate, moneyType, session) => {
   await Promise.all(
@@ -66,23 +60,9 @@ const calculateLosingMoneyForWinner = async (
   } catch (err) {
     console.log(err);
   }
-
-  // await Promise.all(
-  //   winnerList.map((user) => (
-  //     UserBettingData.findOneAndUpdate(
-  //       { gameDate, user: user.id },
-  //       {
-  //         $inc: {
-  //           earnedMoney: user.earnedMoney,
-  //         },
-  //       },
-  //       { session }
-  //     )
-  //   ))
-  // );
 };
 
-const calculateBettingMoney = async (gameDate, session) => {
+module.exports = async (gameDate, session) => {
   // 1. gameDate와 일치하는 Statistic을 찾음 : $match
   // 2. score 점수로 오름차순 sorting : $sort
   // 3. position 별로 그루핑 : $group
@@ -216,119 +196,8 @@ const calculateBettingMoney = async (gameDate, session) => {
     await updateMoneyForUser(firstWinnerList, gameDate, "earnedMoney", session);
     await updateMoneyForUser(secondWinnerList, gameDate, "earnedMoney", session);
 
-    console.log("calculateBettingMoney ended");
+    console.log("updateEarnedMoney ended");
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
-
-const sumEarnedMoneyWithUserMoney = async (gameDate, session) => {
-  try {
-    const bettingResult = await UserBettingData
-      .find(
-        { gameDate },
-        "user earnedMoney",
-        { session }
-      ).lean();
-
-    await Promise.all(
-      bettingResult.map((result) => (
-        User.findOneAndUpdate(
-          { _id: result.user },
-          {
-            $inc: {
-              money: result.earnedMoney,
-            },
-          },
-          { session }
-        )
-      ))
-    );
-
-    await Promise.all(
-      bettingResult.map((result) => (
-        UserBettingData.findOneAndUpdate(
-          { gameDate, user: result.user },
-          { isCalculated: true },
-          { session }
-        )
-      ))
-    );
-
-    console.log("sumEarnedMoneyWithUserMoney ended");
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const setBettingRankings = async (gameDate, session) => {
-  try {
-    const userBettingData = await UserBettingData
-      .find(
-        { gameDate },
-        "user earnedMoney bettingMoney profit",
-        { session }
-      ).lean();
-
-    userBettingData
-      .forEach((data) => {
-        const currentData = data;
-        const profit = data.earnedMoney - data.bettingMoney;
-        currentData.profit = profit;
-      });
-
-    const sortingUserBettingData = userBettingData
-      .sort((a, b) => {
-        if (a.profit > b.profit) return -1;
-        if (a.profit < b.profit) return 1;
-        return 0;
-      });
-
-    for (let i = 0; i < sortingUserBettingData.length; i += 1) {
-      const currentData = sortingUserBettingData[i];
-      const prevData = sortingUserBettingData[i - 1];
-      currentData.rank = i + 1;
-
-      if (i !== 0 && currentData.profit === prevData.profit) {
-        currentData.rank = prevData.rank;
-      }
-    }
-
-    await Promise.all(
-      sortingUserBettingData.map((data) => (
-        UserBettingData.findByIdAndUpdate(
-          { gameDate, _id: data._id },
-          { rank: data.rank },
-          {
-            upsert: true,
-            session,
-          }
-        )
-      ))
-    );
-
-    console.log("sumBettingRankings end");
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-// TODO : 스케쥴링에 함수 추가
-// (async () => {
-//   const session = await startSession();
-
-//   try {
-//     session.startTransaction();
-
-//     await calculateBettingMoney("20210427", session);
-//     await sumEarnedMoneyWithUserMoney("20210420");
-//     await setBettingRankings("20210427", session);
-
-//     await session.commitTransaction();
-//     session.endSession();
-//   } catch (err) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     console.log(err);
-//   }
-// })();
