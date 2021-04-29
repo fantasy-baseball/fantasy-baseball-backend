@@ -11,11 +11,18 @@ module.exports = async (dateString) => {
       `Log: fetch ${dateString} game schedule, game: ${gameList.length}`
     );
 
-    await Game.create({
-      gameDate: dateString,
-      schedule: gameList,
-      createdAt: new Date(),
-    });
+    await Game.findOneAndUpdate(
+      { gameDate: dateString },
+      {
+        gameDate: dateString,
+        schedule: gameList,
+        createdAt: new Date(),
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
 
     logger.info(`Log: ${dateString} Game document is created`);
     logger.info("Success: fetch game schedule and save");
