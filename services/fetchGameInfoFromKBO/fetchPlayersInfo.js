@@ -7,7 +7,11 @@ const fetchPlayersInfo = async (players) => {
     result.push({ ...players[i] });
   }
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: "/usr/bin/google-chrome-stable",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: true,
+  });
   const pages = await Promise.all(
     players.map(() => browser.newPage())
   );
