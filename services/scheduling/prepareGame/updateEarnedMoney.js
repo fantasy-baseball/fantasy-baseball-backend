@@ -113,6 +113,15 @@ module.exports = async (gameDate, session) => {
     const winnersMoneyList = [];
     let awardedUsers = [];
 
+    const hasBettings = statisticsPerPosition.some((position) => (
+      position.players.length !== 0
+    ));
+
+    if (!hasBettings) {
+      logger.info("Log: no betting users");
+      return false;
+    }
+
     statisticsPerPosition.forEach((position, positionIndex) => {
       const bestScore = position.players[0].score;
       let secondScore = null;
