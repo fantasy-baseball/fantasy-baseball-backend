@@ -19,14 +19,14 @@ oauth.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const readFile = promisify(fs.readFile);
 
-const sendGrouptMail = async (template, prevDate) => {
+const sendGrouptMail = async (template, prevGameDate) => {
   const templatePath = path.join(__dirname, `../public/${template}.html`);
   let mails;
 
   try {
-    if (prevDate) {
+    if (prevGameDate) {
       const bettingData = await UserBettingData
-        .find({ prevDate }, "user")
+        .find({ gameDate: prevGameDate }, "user")
         .populate({
           path: "user",
           select: "email",
