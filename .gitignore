@@ -5,3 +5,8 @@
 /mock
 /logs
 /testFunciton
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
