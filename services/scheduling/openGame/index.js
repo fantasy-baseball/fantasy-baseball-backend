@@ -7,7 +7,7 @@ module.exports = async () => {
     logger.info("Start: open game");
 
     await fetchStartingLineUpAndSave();
-    // await sendGrouptMail("openGame");
+    // await sendGrouptMail("openEmail");
 
     logger.info("End: open game");
   } catch (err) {
