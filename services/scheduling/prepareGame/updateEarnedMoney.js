@@ -31,13 +31,11 @@ const calculateLosingMoneyForWinner = async (
     const winnerList = [];
 
     winners.forEach((position, positionIndex) => {
-      // 포지션별 나머지 돈 합계
       let losingMoney = (
         totalBettingMoneyPerPosition - winnerMoneyList[positionIndex].totalMoney
       ) * ratio;
 
       position.users.forEach((group) => {
-        // 동점자가 있는 경우 그룹 별로 1/n로 나누어가짐
         losingMoney = Math.round(losingMoney / position.users.length);
 
         group.forEach((user) => {
@@ -64,11 +62,6 @@ const calculateLosingMoneyForWinner = async (
 };
 
 module.exports = async (gameDate, session) => {
-  // 1. gameDate와 일치하는 Statistic을 찾음 : $match
-  // 2. score 점수로 오름차순 sorting : $sort
-  // 3. position 별로 그루핑 : $group
-  //    - "totalBettingMoney"의 값이 0 이상인 선수들만 $push
-
   logger.info("Start: update earned money");
 
   try {
@@ -151,7 +144,6 @@ module.exports = async (gameDate, session) => {
           return;
         }
 
-        // 1등 동점자가 존재하는 경우 2등은 계산하지 않음
         if (usersSelectingFirstPlayer[positionIndex].users.length > 1) return;
 
         if (secondScore === player.score) {
@@ -165,9 +157,7 @@ module.exports = async (gameDate, session) => {
           return;
         }
 
-        // 2등 스코어 최초 등장
         if (bestScore > player.score) {
-          // 2등 스코어가 이미 존재하는 경우 return
           if (secondScore !== null || secondScore > player.score) return;
 
           secondScore = player.score;
@@ -188,10 +178,8 @@ module.exports = async (gameDate, session) => {
 
     awardedUsers = awardedUsers.flat();
 
-    // 우승한 유저들에게 본인이 건 돈 돌려주기
     await updateMoneyForUser(awardedUsers, gameDate, "bettingMoney", session);
 
-    // 각 유저별 earnedMoney 계산 후 유저가 담긴 list 반환
     const firstWinnerList = await calculateLosingMoneyForWinner(
       usersSelectingFirstPlayer,
       gameDate,
@@ -205,7 +193,6 @@ module.exports = async (gameDate, session) => {
       0.3
     );
 
-    // 유저별 획득한 돈 업데이트
     await updateMoneyForUser(firstWinnerList, gameDate, "earnedMoney", session);
     await updateMoneyForUser(secondWinnerList, gameDate, "earnedMoney", session);
 
