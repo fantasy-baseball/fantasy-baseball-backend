@@ -7,10 +7,11 @@ const updateTotalScore = async (gameDate, session) => {
     logger.info("Start: update total score");
 
     const playerScores = await Statistic
-      .find({
-        gameDate,
-      }, "score")
-      .session(session)
+      .find(
+        { gameDate },
+        "score",
+        { session }
+      )
       .lean();
 
     const playerTotalScore = playerScores.reduce(

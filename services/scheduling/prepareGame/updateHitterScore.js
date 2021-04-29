@@ -161,13 +161,17 @@ const calculateHitterScore = (record) => {
 
 const updateHitterScore = async (gameDate, session) => {
   try {
-    logger.info("Start: update hitter score");
+    logger.info(`Start: update hitter score ${gameDate}`);
 
     const hitters = await Statistic
-      .find({
-        gameDate,
-        playerType: "hitter",
-      })
+      .find(
+        {
+          gameDate,
+          playerType: "hitter",
+        },
+        null,
+        { session }
+      )
       .lean();
 
     hitters.forEach(async (hitter) => {
@@ -181,7 +185,7 @@ const updateHitterScore = async (gameDate, session) => {
       );
     });
 
-    logger.info("Success: update hitter score");
+    logger.info(`Success: update hitter score ${gameDate}`);
     return true;
   } catch (err) {
     logger.error(err);
