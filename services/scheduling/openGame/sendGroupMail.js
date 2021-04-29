@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../../../models/User");
 const UserBettingData = require("../../../models/UserBettingData");
+const logger = require("../../../config/winston");
 
 const {
   GOOGLE_CLIENT_ID,
@@ -24,6 +25,8 @@ const sendGrouptMail = async (template, prevGameDate) => {
   let mails;
 
   try {
+    logger.info("Start: send mail");
+
     if (prevGameDate) {
       const bettingData = await UserBettingData
         .find({ gameDate: prevGameDate }, "user")
@@ -62,9 +65,12 @@ const sendGrouptMail = async (template, prevGameDate) => {
     };
 
     const result = await transport.sendMail(mailOptions);
+
+    logger.info("Success: send mail");
+
     return result;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 

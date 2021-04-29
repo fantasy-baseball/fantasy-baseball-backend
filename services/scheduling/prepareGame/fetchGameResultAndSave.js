@@ -1,55 +1,63 @@
+const { startSession } = require("mongoose");
 const Game = require("../../../models/Game");
 const Statistic = require("../../../models/Statistic");
 const fetchGameResult = require("../../fetchGameInfoFromKBO/fetchGameResult");
+const logger = require("../../../config/winston");
 
-const updatePlayerStatistic = async (records, gameDate, isHitter) => {
+const updatePlayerStatistic = async (records, gameDate, isHitter, session) => {
   const recordsByRole = Object.entries(records);
-  let result = [];
 
-  for (let i = 0; i < recordsByRole.length; i += 1) {
-    const [player, playerInfo] = recordsByRole[i];
-    const { team, position } = playerInfo;
-    const nameRegex = new RegExp(player);
+  const result = await Promise.all(
+    recordsByRole.map(([player, playerInfo]) => {
+      const { team, position } = playerInfo;
+      const nameRegex = new RegExp(player);
 
-    const toBeUpdatedRecord = isHitter
-      ? {
-        specialRecords: playerInfo.specialRecords,
-        inningRecords: playerInfo.inningRecords,
-        summary: playerInfo.summary,
-      } : {
-        specialRecords: playerInfo.specialRecords,
-        summary: playerInfo.record,
-      };
+      const toBeUpdatedRecord = isHitter
+        ? {
+          specialRecords: playerInfo.specialRecords,
+          inningRecords: playerInfo.inningRecords,
+          summary: playerInfo.summary,
+        } : {
+          specialRecords: playerInfo.specialRecords,
+          summary: playerInfo.record,
+        };
 
-    result.push(
-      Statistic.findOneAndUpdate(
-        {
-          name: { $regex: nameRegex },
-          team,
-          position,
-          gameDate,
-        },
-        {
-          record: toBeUpdatedRecord,
-        }
-      ).lean()
-    );
-  }
+      return (
+        Statistic.findOneAndUpdate(
+          {
+            name: { $regex: nameRegex },
+            team,
+            position,
+            gameDate,
+          },
+          {
+            record: toBeUpdatedRecord,
+          },
+          { session }
+        ).lean()
+      );
+    })
+  );
 
-  result = (await Promise.all(result))
-    .filter((statistic) => !!statistic);
-
-  return result;
+  return result.filter((statistic) => !!statistic);
 };
 
 module.exports = async (gameDate) => {
+  logger.info("Start: fetch game result and save");
+
+  const session = await startSession();
+
   try {
+    session.startTransaction();
+
     const currentGames = await Game.find({ gameDate });
     const gameIds = currentGames
       .flatMap((game) => game.schedule)
       .map((schedule) => schedule.gameId);
 
     const gameResults = await fetchGameResult(gameIds);
+    logger.info(`Log: fetch ${gameDate} game result`);
+
     const hittersRecords = {};
     const pitchersRecords = {};
 
@@ -69,7 +77,6 @@ module.exports = async (gameDate) => {
 
     for (let i = 0; i < gameResults.length; i += 1) {
       const { gameSummary, playersRecord } = gameResults[i];
-
       const specialRecordsByPlayer = Object.entries(gameSummary);
 
       for (let j = 0; j < specialRecordsByPlayer.length; j += 1) {
@@ -122,23 +129,38 @@ module.exports = async (gameDate) => {
     }
 
     const hitterStatistics = await updatePlayerStatistic(
-      hittersRecords, gameDate, true
+      hittersRecords,
+      gameDate,
+      true,
+      session
     );
+    logger.info(`Log: save ${hitterStatistics.length} hitter statistic`);
+
     const pitcherStatistics = await updatePlayerStatistic(
-      pitchersRecords, gameDate, false
+      pitchersRecords,
+      gameDate,
+      false,
+      session
     );
+    logger.info(`Log: save ${pitcherStatistics.length} pitcher statistic`);
 
-    const gamesWithResult = [];
-    for (let i = 0; i < currentGames.length; i += 1) {
-      const game = currentGames[i];
-      gamesWithResult.push(
-        game.updateOne({ hasResult: true })
-      );
-    }
+    await Promise.all(currentGames.map(
+      (game) => game.updateOne(
+        { hasResult: true },
+        { session }
+      )
+    ));
 
-    await Promise.all(gamesWithResult);
-    console.log(hitterStatistics.length + pitcherStatistics.length, "players result save");
+    await session.commitTransaction();
+    logger.info(`Success: ${hitterStatistics.length + pitcherStatistics.length} player results are saved`);
+
+    return true;
   } catch (err) {
-    console.error(err);
+    await session.abortTransaction();
+    logger.error(err);
+
+    return false;
+  } finally {
+    session.endSession();
   }
 };

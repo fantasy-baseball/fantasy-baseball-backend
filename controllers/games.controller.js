@@ -1,5 +1,5 @@
 const createError = require("http-errors");
-const checkBettingOpened = require("../utils/index");
+const checkBettingOpened = require("../utils/checkBettingOpened");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
 const User = require("../models/User");
@@ -185,8 +185,8 @@ exports.getUserRankings = async (req, res, next) => {
     const gameDate = req.params.game_date;
     const userRankings = await UserBettingData
       .find(
-        { gameDate },
-        "roaster earnedMoney bettingMoney user rank"
+        { gameDate, isCalculated: true },
+        "roaster earnedMoney bettingMoney user rank profit"
       )
       .sort({ rank: 1 })
       .populate({
@@ -212,6 +212,21 @@ exports.getUserRankings = async (req, res, next) => {
 exports.getPlayerRankings = async (req, res, next) => {
   try {
     const gameDate = req.params.game_date;
+    const isScoreCalculated = await Statistic
+      .find(
+        {
+          gameDate,
+          score: {
+            $ne: null,
+          },
+        }
+      );
+
+    if (isScoreCalculated.length === 0) {
+      next(createError(404, "Can't find playerRankings"));
+      return;
+    }
+
     const playerRankings = await Statistic
       .aggregate([
         {
@@ -300,6 +315,11 @@ exports.getPositionRankings = async (req, res, next) => {
                 name: "$name",
                 team: "$team",
                 score: "$score",
+                users: {
+                  $size: {
+                    $ifNull: ["$users", []]
+                  },
+                },
               },
             },
           },

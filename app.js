@@ -4,7 +4,7 @@ require("./loader/registerSchedule");
 const createError = require("http-errors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const logger = require("morgan");
+const morgan = require("morgan");
 const cors = require("cors");
 
 const usersRouter = require("./routes/users");
@@ -16,7 +16,12 @@ connectMongoDB();
 
 const app = express();
 
-app.use(logger("dev"));
+if (process.env.NODE_ENV === "production") {
+  app.use(morgan("combined"));
+} else {
+  app.use(morgan("dev"));
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

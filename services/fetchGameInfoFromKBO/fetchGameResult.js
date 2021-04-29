@@ -51,7 +51,7 @@ const groupSummaryByPlayers = (gameSummaries) => {
   return result;
 };
 
-const crawlGameResults = async (gameIds) => {
+const fetchGameResult = async (gameIds) => {
   const browser = await puppeteer.launch();
   const pages = await Promise.all(
     gameIds.map(() => browser.newPage())
@@ -294,4 +294,4 @@ const crawlGameResults = async (gameIds) => {
   return result;
 };
 
-module.exports = crawlGameResults;
+module.exports = fetchGameResult;
