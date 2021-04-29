@@ -40,7 +40,10 @@ module.exports = async () => {
       await updateScoreSession.commitTransaction();
     } else {
       await updateScoreSession.abortTransaction();
+      updateScoreSession.endSession();
+      return;
     }
+
     updateScoreSession.endSession();
 
     const updateUserSession = await startSession();
