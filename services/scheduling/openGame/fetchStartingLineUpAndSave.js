@@ -83,7 +83,7 @@ module.exports = async () => {
             name: player.name,
             team: player.team,
             position: player.position,
-            playerType: player.position,
+            playerType: player.playerType,
             gameDate: dateString,
           },
           {
