@@ -1,9 +1,10 @@
 const winston = require("winston");
 const WinstonDaily = require("winston-daily-rotate-file");
+require("winston-syslog");
+const localhost = require("os").hostname();
 
 const logDir = "logs";
 const { combine, timestamp, printf } = winston.format;
-
 const logFormat = printf((info) => (
   `${info.timestamp} ${info.level}: ${info.message}`
 ));
@@ -34,6 +35,15 @@ const logger = winston.createLogger({
     }),
   ],
 });
+
+const options = {
+  host: process.env.PAPERTRAIL_HOST,
+  port: process.env.PAPERTRAIL_PORT,
+  app_name: "fantasy-baseball",
+  localhost,
+};
+
+logger.add(new winston.transports.Syslog(options));
 
 if (process.env.NODE_ENV !== "production") {
   logger.add(new winston.transports.Console({

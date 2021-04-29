@@ -1,16 +1,32 @@
 const puppeteer = require("puppeteer");
 const { KBO_PLAYER_SEARCH_URL } = require("../../constants/kboUrl");
+const logger = require("../../config/winston");
 
 const fetchPlayersInfo = async (players) => {
+  players = [players[0], players[1]];
+
   const result = [];
   for (let i = 0; i < players.length; i += 1) {
     result.push({ ...players[i] });
   }
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: "/usr/bin/google-chrome-stable",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: true,
+  });
+
   const pages = await Promise.all(
     players.map(() => browser.newPage())
   );
+
+  await Promise.all(
+    pages.map((page) => (
+      page.setDefaultNavigationTimeout(0)
+    ))
+  );
+
+  logger.info("Log: open pages");
 
   await Promise.all(
     players.map((player, i) => {
@@ -18,6 +34,8 @@ const fetchPlayersInfo = async (players) => {
       return page.goto(KBO_PLAYER_SEARCH_URL + player.name);
     })
   );
+
+  logger.info("Log: go to kbo player search url / player name");
 
   const links = await Promise.all(
     players.map((currentPlayer, i) => {
@@ -51,11 +69,15 @@ const fetchPlayersInfo = async (players) => {
     })
   );
 
+  logger.info("Log: get player info link");
+
   await Promise.all(
     pages.map((page, i) => (
       page.goto(links[i])
     ))
   );
+
+  logger.info("Log: go to player info link page");
 
   const playerInfos = await Promise.all(
     pages.map((page) => (

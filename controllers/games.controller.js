@@ -166,13 +166,18 @@ exports.getBettingStatus = async (req, res, next) => {
       return;
     }
 
-    const { userBettingData, totalMoney } = currentGame;
+    const {
+      userBettingData,
+      totalMoney,
+      hasResult,
+    } = currentGame;
 
     res.status(200).json({
       result: "ok",
       data: {
         users: userBettingData,
         totalMoney,
+        hasResult,
       },
     });
   } catch (err) {
