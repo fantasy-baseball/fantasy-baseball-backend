@@ -170,20 +170,16 @@ const updateHitterScore = async (gameDate, session) => {
       })
       .lean();
 
-    await Promise.all(
-      hitters.map((hitter) => {
-        const { record, _id } = hitter;
-        const score = calculateHitterScore(record);
+    hitters.forEach(async (hitter) => {
+      const { record, _id } = hitter;
+      const score = calculateHitterScore(record);
 
-        return (
-          Statistic.findOneAndUpdate(
-            { _id },
-            { score },
-            { session }
-          )
-        );
-      })
-    );
+      await Statistic.findOneAndUpdate(
+        { _id },
+        { score },
+        { session }
+      );
+    });
 
     logger.info("Success: update hitter score");
     return true;
