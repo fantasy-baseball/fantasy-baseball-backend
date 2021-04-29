@@ -1,33 +1,50 @@
+const { startSession } = require("mongoose");
 const { format } = require("date-fns");
 const Game = require("../../../models/Game");
 const Player = require("../../../models/Player");
 const Statistic = require("../../../models/Statistic");
 const fetchPlayerEntry = require("../../fetchGameInfoFromKBO/fetchPlayerEntry");
 const fetchPlayersInfo = require("../../fetchGameInfoFromKBO/fetchPlayersInfo");
+const logger = require("../../../config/winston");
 
 module.exports = async () => {
+  logger.info("Start: fetch starting line up and save");
+
+  const session = await startSession();
+
   try {
+    session.startTransaction();
+
     const dateString = format(new Date(), "yyyyMMdd");
 
     const currentGame = await Game
-      .findOne({ gameDate: dateString }, "schedule");
+      .findOne(
+        { gameDate: dateString },
+        "schedule",
+        { session }
+      );
 
-    console.log(`Load ${dateString} game`);
+    logger.info(`Log: load ${dateString} game`);
 
     if (currentGame.schedule.length === 0) {
-      throw new Error("there is no game schedule");
+      throw new Error("Error: there is no game schedule");
     }
 
     const { schedule: gameList } = currentGame;
 
     const players = await fetchPlayerEntry(gameList);
+    if (players.length === 0) {
+      throw new Error("Error: there is no players");
+    }
 
-    console.log("get playerEntry");
-    console.log(`players ${players.length}`);
+    logger.info(`Log: fetch ${players.length} players`);
 
     const playersWithInfo = await fetchPlayersInfo(players);
+    if (playersWithInfo.length === 0) {
+      throw new Error("Error : there is no player informations");
+    }
 
-    console.log("get playersInfo");
+    logger.info(`Log: fetch ${playersWithInfo.length} player informations`);
 
     const newPlayers = await Promise.all(
       playersWithInfo.map((player) => (
@@ -45,6 +62,7 @@ module.exports = async () => {
           {
             new: true,
             upsert: true,
+            session,
           }
         )
       ))
@@ -65,12 +83,13 @@ module.exports = async () => {
             name: player.name,
             team: player.team,
             position: player.position,
-            playerType: player.position,
+            playerType: player.playerType,
             gameDate: dateString,
           },
           {
             new: true,
             upsert: true,
+            session,
           }
         )
       ))
@@ -92,13 +111,15 @@ module.exports = async () => {
             $push: {
               statistics: statisticsId,
             }
-          }
+          },
+          { session }
         )
       );
 
       statisticsWithPlayerId.push(
         newStatistic.updateOne(
-          { playerId }
+          { playerId },
+          { session }
         )
       );
     }
@@ -106,13 +127,23 @@ module.exports = async () => {
     await Promise.all(playersWithStatisticId);
     await Promise.all(statisticsWithPlayerId);
 
-    await currentGame.updateOne({
-      players: playerIds,
-      isOpened: true,
-    });
+    logger.info("Log: save players");
 
-    console.log("open game complete");
+    await currentGame.updateOne(
+      {
+        players: playerIds,
+        isOpened: true,
+      },
+      { session }
+    );
+
+    logger.info("Success: fetch starting line up and save");
+
+    await session.commitTransaction();
   } catch (err) {
-    console.log(err);
+    await session.abortTransaction();
+    logger.error(err);
+  } finally {
+    session.endSession();
   }
 };

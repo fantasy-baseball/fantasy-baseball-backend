@@ -1,5 +1,5 @@
 const createError = require("http-errors");
-const checkBettingOpened = require("../utils/index");
+const checkBettingOpened = require("../utils/checkBettingOpened");
 const Game = require("../models/Game");
 const Player = require("../models/Player");
 const User = require("../models/User");
@@ -321,7 +321,6 @@ exports.getPositionRankings = async (req, res, next) => {
       data: positionRankings,
     });
   } catch (err) {
-    console.log(err);
     next(createError(500, "Fail to get position rankings"));
   }
 };
