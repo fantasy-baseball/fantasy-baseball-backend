@@ -1,4 +1,4 @@
-const formatDate = require("./date");
+const { format } = require("date-fns");
 const { BETTING_END_TIME, GAME_START_TIME } = require("../constants/game");
 
 const checkDay = (day) => {
@@ -14,7 +14,7 @@ const checkDay = (day) => {
 };
 
 const checkBettingOpened = (date) => {
-  const localDate = formatDate(date, "eee:kk:mm:ss");
+  const localDate = format(date, "eee:kk:mm:ss");
   const today = checkDay(localDate.substring(0, 3));
   const now = localDate.substring(4, 12);
 

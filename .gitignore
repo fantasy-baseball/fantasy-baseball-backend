@@ -2,6 +2,10 @@
 .env
 .DS_Store
 
+/mock
+/logs
+/testFunciton
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

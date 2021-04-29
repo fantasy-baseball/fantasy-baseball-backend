@@ -17,7 +17,7 @@
  *  }
  *
  * example:
- * const entry = await crawlPlayerEntry([
+ * const entry = await fetchPlayerEntry([
  *   {
  *     gameId: "20210417WOKT0",
  *     leagueId: 1,
@@ -72,7 +72,7 @@ const getPlayersFromEntry = (entry, isHomeTeam, games) => {
   return result;
 };
 
-const crawlPlayerEntry = async (gameList) => {
+const fetchPlayerEntry = async (gameList) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -137,4 +137,4 @@ const crawlPlayerEntry = async (gameList) => {
   return players;
 };
 
-module.exports = crawlPlayerEntry;
+module.exports = fetchPlayerEntry;

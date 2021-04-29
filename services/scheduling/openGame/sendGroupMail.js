@@ -4,6 +4,7 @@ const path = require("path");
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../../../models/User");
+const logger = require("../../../config/winston");
 
 const {
   GOOGLE_CLIENT_ID,
@@ -17,17 +18,18 @@ const oauth = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_
 oauth.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const readFile = promisify(fs.readFile);
-const templatePath = path.join(__dirname, "../public/email.html");
+const templatePath = path.join(__dirname, "../../../public/email.html");
 const mails = [];
 
 const sendGrouptMail = async () => {
   try {
-    // const users = await User.find().lean();
+    logger.info("Start: send mail");
 
-    // for (let i = 0; i < users.length; i += 1) {
-    //   mails.push(users[i].email);
-    // }
-    // 유저 이메일 가져오기
+    const users = await User.find().lean();
+
+    for (let i = 0; i < users.length; i += 1) {
+      mails.push(users[i].email);
+    }
 
     const accessToken = await oauth.getAccessToken();
 
@@ -54,9 +56,12 @@ const sendGrouptMail = async () => {
     };
 
     const result = await transport.sendMail(mailOptions);
+
+    logger.info("Success: send mail");
+
     return result;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 };
 
