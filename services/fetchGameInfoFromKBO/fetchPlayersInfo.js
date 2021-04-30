@@ -3,10 +3,7 @@ const { KBO_PLAYER_SEARCH_URL } = require("../../constants/kboUrl");
 const logger = require("../../config/winston");
 
 const fetchPlayersInfo = async (players) => {
-  const result = [];
-  for (let i = 0; i < players.length; i += 1) {
-    result.push({ ...players[i] });
-  }
+  const results = [];
 
   const browser = await puppeteer.launch({
     executablePath: "/usr/bin/google-chrome-stable",
@@ -14,80 +11,46 @@ const fetchPlayersInfo = async (players) => {
     headless: true,
   });
 
-  const pages = await Promise.all(
-    players.map(() => browser.newPage())
-  );
+  for (let i = 0; i < players.length; i += 1) {
+    const player = players[i];
 
-  await Promise.all(
-    pages.map((page) => (
-      page.setDefaultNavigationTimeout(1200000)
-    ))
-  );
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(30000);
+    logger.info(`Log: open ${i} th page`);
 
-  logger.info("Log: open pages");
+    await page.goto(KBO_PLAYER_SEARCH_URL + player.name);
+    logger.info(`Log: page goes to ${i} th player search page`);
 
-  await Promise.all(
-    players.map((player, i) => {
-      const page = pages[i];
-      return page
-        .goto(KBO_PLAYER_SEARCH_URL + player.name)
-        .then(() => {
-          logger.info(`Log: page goes to ${i} th player search page`);
-        });
-    })
-  );
+    const link = await page.evaluate((toBeMatchedPlayer) => {
+      const $rows = document.querySelectorAll(".tEx tBody > tr");
 
-  logger.info("Log: all page go to kbo player search url / player name");
+      for (let j = 0; j < $rows.length; j += 1) {
+        const $row = $rows[j];
 
-  const links = await Promise.all(
-    players.map((currentPlayer, i) => {
-      const searchCompletePage = pages[i];
+        const backNumber = $row.children[0].textContent.trim();
+        const name = $row.children[1].textContent.trim();
+        const team = $row.children[2].textContent.trim();
 
-      return (
-        searchCompletePage.evaluate((toBeMatchedPlayer) => {
-          const $rows = document.querySelectorAll(".tEx tBody > tr");
+        const isMatched = (
+          backNumber !== "#"
+            && toBeMatchedPlayer.name === name
+            && toBeMatchedPlayer.team === team
+        );
 
-          for (let j = 0; j < $rows.length; j += 1) {
-            const $row = $rows[j];
+        if (isMatched) {
+          return $row.children[1].children[0].href;
+        }
+      }
 
-            const backNumber = $row.children[0].textContent.trim();
-            const name = $row.children[1].textContent.trim();
-            const team = $row.children[2].textContent.trim();
+      return null;
+    }, player);
+    logger.info(`Log: get ${i} th player info link`);
 
-            const isMatched = (
-              backNumber !== "#"
-                && toBeMatchedPlayer.name === name
-                && toBeMatchedPlayer.team === team
-            );
+    if (link) {
+      await page.goto(link);
+      logger.info(`Log: page goes to ${i} th player info page`);
 
-            if (isMatched) {
-              return $row.children[1].children[0].href;
-            }
-          }
-
-          return null;
-        }, currentPlayer)
-      );
-    })
-  );
-
-  logger.info("Log: get player info link");
-
-  await Promise.all(
-    pages.map((page, i) => (
-      page
-        .goto(links[i])
-        .then(() => {
-          logger.info(`Log: page goes to ${i} th player info page`);
-        })
-    ))
-  );
-
-  logger.info("Log: all pages go to player info page");
-
-  const playerInfos = await Promise.all(
-    pages.map((page) => (
-      page.evaluate(() => {
+      const playerInfo = await page.evaluate(() => {
         const playerPhotoUrl = document.querySelector(
           "#cphContents_cphContents_cphContents_playerProfile_imgProgile"
         ).src;
@@ -101,30 +64,33 @@ const fetchPlayersInfo = async (players) => {
           backNumber,
           role,
         };
-      })
-    ))
-  );
+      });
+      logger.info(`Log: get ${i} th player info`);
 
-  for (let i = 0; i < players.length; i += 1) {
-    const {
-      playerPhotoUrl,
-      backNumber,
-      role,
-    } = playerInfos[i];
+      const {
+        playerPhotoUrl,
+        backNumber,
+        role,
+      } = playerInfo;
 
-    const collectedLink = links[i];
-    const kboId = collectedLink.replace(/.*playerId=/, "");
+      const kboId = link.replace(/.*playerId=/, "");
 
-    result[i].link = collectedLink;
-    result[i].kboId = kboId;
-    result[i].playerPhotoUrl = playerPhotoUrl;
-    result[i].backNumber = backNumber;
-    result[i].role = role;
+      const result = { ...players[i] };
+      result.link = link;
+      result.kboId = kboId;
+      result.playerPhotoUrl = playerPhotoUrl;
+      result.backNumber = backNumber;
+      result.role = role;
+
+      results.push(result);
+    }
+
+    await page.close();
   }
 
   await browser.close();
 
-  return result;
+  return results;
 };
 
 module.exports = fetchPlayersInfo;
