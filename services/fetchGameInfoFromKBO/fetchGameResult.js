@@ -62,6 +62,12 @@ const fetchGameResult = async (gameIds) => {
   );
 
   await Promise.all(
+    pages.map((page) => (
+      page.setDefaultNavigationTimeout(1200000)
+    ))
+  );
+
+  await Promise.all(
     gameIds.map((gameId, i) => {
       const page = pages[i];
       const queryString = makeQueryString({
@@ -76,7 +82,7 @@ const fetchGameResult = async (gameIds) => {
 
   const pageLoadResults = await allSettled(
     pages.map(
-      (page) => page.waitForSelector(".sub-tit", { timeout: 10000 })
+      (page) => page.waitForSelector(".sub-tit", { timeout: 100000 })
     )
   );
 
