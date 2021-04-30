@@ -22,7 +22,7 @@ const checkBettingOpened = (date) => {
     return false;
   }
 
-  if (now > GAME_START_TIME[today]) {
+  if (now < GAME_START_TIME[today]) {
     return false;
   }
 
