@@ -14,7 +14,7 @@ module.exports = async () => {
 
   try {
     // const dateString = format(new Date(), "yyyyMMdd");
-    const dateString = "20210428";
+    const dateString = "20210423";
 
     const currentGame = await Game
       .findOne(

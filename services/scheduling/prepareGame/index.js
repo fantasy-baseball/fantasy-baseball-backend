@@ -18,8 +18,8 @@ module.exports = async () => {
     //   "yyyyMMdd"
     // );
 
-    const dateString = "20210423";
-    const yesterdayDateString = "20210422";
+    const dateString = "20210424";
+    const yesterdayDateString = "20210423";
 
     logger.info(`Start: prepare ${dateString} game`);
 
