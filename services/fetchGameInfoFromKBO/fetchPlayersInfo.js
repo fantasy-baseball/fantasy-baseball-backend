@@ -22,7 +22,7 @@ const fetchPlayersInfo = async (players) => {
 
   await Promise.all(
     pages.map((page) => (
-      page.setDefaultNavigationTimeout(200000)
+      page.setDefaultNavigationTimeout(1200000)
     ))
   );
 
