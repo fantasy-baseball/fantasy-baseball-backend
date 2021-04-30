@@ -15,7 +15,8 @@ module.exports = async () => {
   try {
     session.startTransaction();
 
-    const dateString = format(new Date(), "yyyyMMdd");
+    // const dateString = format(new Date(), "yyyyMMdd");
+    const dateString = "20210429";
 
     const currentGame = await Game
       .findOne(
