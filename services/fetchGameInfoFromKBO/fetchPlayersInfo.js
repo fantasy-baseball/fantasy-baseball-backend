@@ -3,8 +3,6 @@ const { KBO_PLAYER_SEARCH_URL } = require("../../constants/kboUrl");
 const logger = require("../../config/winston");
 
 const fetchPlayersInfo = async (players) => {
-  players = [players[0], players[1]];
-
   const result = [];
   for (let i = 0; i < players.length; i += 1) {
     result.push({ ...players[i] });
@@ -31,11 +29,15 @@ const fetchPlayersInfo = async (players) => {
   await Promise.all(
     players.map((player, i) => {
       const page = pages[i];
-      return page.goto(KBO_PLAYER_SEARCH_URL + player.name);
+      return page
+        .goto(KBO_PLAYER_SEARCH_URL + player.name)
+        .then(() => {
+          logger.info(`Log: page goes to ${i} th player search page`);
+        });
     })
   );
 
-  logger.info("Log: go to kbo player search url / player name");
+  logger.info("Log: all page go to kbo player search url / player name");
 
   const links = await Promise.all(
     players.map((currentPlayer, i) => {
@@ -73,11 +75,15 @@ const fetchPlayersInfo = async (players) => {
 
   await Promise.all(
     pages.map((page, i) => (
-      page.goto(links[i])
+      page
+        .goto(links[i])
+        .then(() => {
+          logger.info(`Log: page goes to ${i} th player info page`);
+        })
     ))
   );
 
-  logger.info("Log: go to player info link page");
+  logger.info("Log: all pages go to player info page");
 
   const playerInfos = await Promise.all(
     pages.map((page) => (

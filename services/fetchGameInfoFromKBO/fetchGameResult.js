@@ -82,7 +82,7 @@ const fetchGameResult = async (gameIds) => {
 
   const pageLoadResults = await allSettled(
     pages.map(
-      (page) => page.waitForSelector(".sub-tit", { timeout: 100000 })
+      (page) => page.waitForSelector(".sub-tit", { timeout: 600000 })
     )
   );
 
