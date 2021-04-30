@@ -12,14 +12,17 @@ module.exports = async (gameDate, session) => {
         { session }
       ).lean();
 
-    userBettingData
-      .forEach((data) => {
+    const userBettingDataWithProfit = userBettingData
+      .map((data) => {
         const currentData = data;
         const profit = data.earnedMoney - data.bettingMoney;
         currentData.profit = profit;
+        return {
+          ...currentData,
+        };
       });
 
-    const sortingUserBettingData = userBettingData
+    const sortingUserBettingData = userBettingDataWithProfit
       .sort((a, b) => {
         if (a.profit > b.profit) return -1;
         if (a.profit < b.profit) return 1;
@@ -40,7 +43,10 @@ module.exports = async (gameDate, session) => {
       sortingUserBettingData.map((data) => (
         UserBettingData.findByIdAndUpdate(
           { gameDate, _id: data._id },
-          { rank: data.rank },
+          {
+            rank: data.rank,
+            profit: data.profit,
+          },
           {
             upsert: true,
             session,
