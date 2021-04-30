@@ -13,10 +13,8 @@ module.exports = async () => {
   const session = await startSession();
 
   try {
-    session.startTransaction();
-
     // const dateString = format(new Date(), "yyyyMMdd");
-    const dateString = "20210429";
+    const dateString = "20210428";
 
     const currentGame = await Game
       .findOne(
@@ -47,102 +45,101 @@ module.exports = async () => {
 
     logger.info(`Log: fetch ${playersWithInfo.length} player informations`);
 
-    const newPlayers = await Promise.all(
-      playersWithInfo.map((player) => (
-        Player.findOneAndUpdate(
-          { kboId: player.kboId },
-          {
-            team: player.team,
-            name: player.name,
-            link: player.link,
-            kboId: player.kboId,
-            playerPhotoUrl: player.playerPhotoUrl,
-            backNumber: player.backNumber,
-            role: player.role,
-          },
-          {
-            new: true,
-            upsert: true,
-            session,
-          }
-        )
-      ))
-    );
-
-    const playerIds = newPlayers.map((player) => player._id);
-
-    const newStatistics = await Promise.all(
-      playersWithInfo.map((player) => (
-        Statistic.findOneAndUpdate(
-          {
-            team: player.team,
-            name: player.name,
-            position: player.position,
-            gameDate: dateString,
-          },
-          {
-            name: player.name,
-            team: player.team,
-            position: player.position,
-            playerType: player.playerType,
-            gameDate: dateString,
-          },
-          {
-            new: true,
-            upsert: true,
-            session,
-          }
-        )
-      ))
-    );
-
-    const statisticIds = newStatistics.map((statistics) => statistics._id);
-
-    const playersWithStatisticId = [];
-    const statisticsWithPlayerId = [];
-    for (let i = 0; i < newPlayers.length; i += 1) {
-      const newPlayer = newPlayers[i];
-      const newStatistic = newStatistics[i];
-      const playerId = playerIds[i];
-      const statisticsId = statisticIds[i];
-
-      playersWithStatisticId.push(
-        newPlayer.updateOne(
-          {
-            $push: {
-              statistics: statisticsId,
+    await session.withTransaction(async () => {
+      const newPlayers = await Promise.all(
+        playersWithInfo.map((player) => (
+          Player.findOneAndUpdate(
+            { kboId: player.kboId },
+            {
+              team: player.team,
+              name: player.name,
+              link: player.link,
+              kboId: player.kboId,
+              playerPhotoUrl: player.playerPhotoUrl,
+              backNumber: player.backNumber,
+              role: player.role,
+            },
+            {
+              new: true,
+              upsert: true,
+              session,
             }
-          },
-          { session }
-        )
+          )
+        ))
       );
 
-      statisticsWithPlayerId.push(
-        newStatistic.updateOne(
-          { playerId },
-          { session }
-        )
+      const playerIds = newPlayers.map((player) => player._id);
+
+      const newStatistics = await Promise.all(
+        playersWithInfo.map((player) => (
+          Statistic.findOneAndUpdate(
+            {
+              team: player.team,
+              name: player.name,
+              position: player.position,
+              gameDate: dateString,
+            },
+            {
+              name: player.name,
+              team: player.team,
+              position: player.position,
+              playerType: player.playerType,
+              gameDate: dateString,
+            },
+            {
+              new: true,
+              upsert: true,
+              session,
+            }
+          )
+        ))
       );
-    }
 
-    await Promise.all(playersWithStatisticId);
-    await Promise.all(statisticsWithPlayerId);
+      const statisticIds = newStatistics.map((statistics) => statistics._id);
 
-    logger.info("Log: save players");
+      const playersWithStatisticId = [];
+      const statisticsWithPlayerId = [];
+      for (let i = 0; i < newPlayers.length; i += 1) {
+        const newPlayer = newPlayers[i];
+        const newStatistic = newStatistics[i];
+        const playerId = playerIds[i];
+        const statisticsId = statisticIds[i];
 
-    await currentGame.updateOne(
-      {
-        players: playerIds,
-        isOpened: true,
-      },
-      { session }
-    );
+        playersWithStatisticId.push(
+          newPlayer.updateOne(
+            {
+              $push: {
+                statistics: statisticsId,
+              }
+            },
+            { session }
+          )
+        );
 
-    logger.info("Success: fetch starting line up and save");
+        statisticsWithPlayerId.push(
+          newStatistic.updateOne(
+            { playerId },
+            { session }
+          )
+        );
+      }
 
-    await session.commitTransaction();
+      await Promise.all(playersWithStatisticId);
+      await Promise.all(statisticsWithPlayerId);
+
+      logger.info("Log: save players");
+
+      await currentGame.updateOne(
+        {
+          players: playerIds,
+          isOpened: true,
+        },
+        { session }
+      );
+
+      logger.info("Success: fetch starting line up and save");
+    });
   } catch (err) {
-    await session.abortTransaction();
     logger.error(err);
   } finally {
     session.endSession();
