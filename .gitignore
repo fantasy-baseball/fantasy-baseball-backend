@@ -4,7 +4,7 @@
 
 /mock
 /logs
-/testFunciton
+/testFunction
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
