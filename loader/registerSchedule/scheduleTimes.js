@@ -10,8 +10,8 @@ exports.preparationTime = preparationTime;
 
 const weekdayGameOpenTime = new schedule.RecurrenceRule();
 weekdayGameOpenTime.dayOfWeek = [new schedule.Range(2, 5)];
-weekdayGameOpenTime.hour = 11;
-weekdayGameOpenTime.minute = 0;
+weekdayGameOpenTime.hour = 18;
+weekdayGameOpenTime.minute = 15;
 weekdayGameOpenTime.tz = "Asia/Seoul";
 
 exports.weekdayGameOpenTime = weekdayGameOpenTime;
