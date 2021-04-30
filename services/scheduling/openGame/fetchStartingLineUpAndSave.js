@@ -13,8 +13,7 @@ module.exports = async () => {
   const session = await startSession();
 
   try {
-    // const dateString = format(new Date(), "yyyyMMdd");
-    const dateString = "20210423";
+    const dateString = format(new Date(), "yyyyMMdd");
 
     const currentGame = await Game
       .findOne(
