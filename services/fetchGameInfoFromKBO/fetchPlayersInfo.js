@@ -19,7 +19,7 @@ const fetchPlayersInfo = async (players) => {
     logger.info(`Log: open ${i} th page`);
 
     await page.goto(KBO_PLAYER_SEARCH_URL + player.name);
-    logger.info(`Log: page goes to ${i} th player search page`);
+    logger.info(`Log: page goes to player ${player.name} search page`);
 
     const link = await page.evaluate((toBeMatchedPlayer) => {
       const $rows = document.querySelectorAll(".tEx tBody > tr");
@@ -44,11 +44,11 @@ const fetchPlayersInfo = async (players) => {
 
       return null;
     }, player);
-    logger.info(`Log: get ${i} th player info link`);
+    logger.info(`Log: get ${player.name} player info link`);
 
     if (link) {
       await page.goto(link);
-      logger.info(`Log: page goes to ${i} th player info page`);
+      logger.info(`Log: page goes to ${player.name} player info page`);
 
       const playerInfo = await page.evaluate(() => {
         const playerPhotoUrl = document.querySelector(

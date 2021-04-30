@@ -117,16 +117,20 @@ const updatePitcherScore = async (gameDate, session) => {
       )
       .lean();
 
-    pitchers.forEach(async (pitcher) => {
-      const { record, _id } = pitcher;
-      const score = calculatePitcherScore(record);
+    await Promise.all(
+      pitchers.map(async (pitcher) => {
+        const { record, _id } = pitcher;
+        const score = calculatePitcherScore(record);
 
-      await Statistic.findOneAndUpdate(
-        { _id },
-        { score },
-        { session }
-      );
-    });
+        return (
+          Statistic.findOneAndUpdate(
+            { _id },
+            { score },
+            { session }
+          )
+        );
+      })
+    );
 
     logger.info(`Success: update pitcher score ${gameDate}`);
 

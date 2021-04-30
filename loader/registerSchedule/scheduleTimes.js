@@ -2,16 +2,18 @@ const schedule = require("node-schedule-tz");
 
 const preparationTime = new schedule.RecurrenceRule();
 preparationTime.dayOfWeek = [0, new schedule.Range(2, 6)];
-preparationTime.hour = 4;
-preparationTime.minute = 0;
+preparationTime.hour = 22;
+preparationTime.minute = 50;
+preparationTime.second = 0;
 preparationTime.tz = "Asia/Seoul";
 
 exports.preparationTime = preparationTime;
 
 const weekdayGameOpenTime = new schedule.RecurrenceRule();
 weekdayGameOpenTime.dayOfWeek = [new schedule.Range(2, 5)];
-weekdayGameOpenTime.hour = 19;
-weekdayGameOpenTime.minute = 0;
+weekdayGameOpenTime.hour = 22;
+weekdayGameOpenTime.minute = 40;
+weekdayGameOpenTime.second = 0;
 weekdayGameOpenTime.tz = "Asia/Seoul";
 
 exports.weekdayGameOpenTime = weekdayGameOpenTime;
