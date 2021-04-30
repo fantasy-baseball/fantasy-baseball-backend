@@ -4,6 +4,7 @@ const path = require("path");
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../../../models/User");
+const UserBettingData = require("../../../models/UserBettingData");
 const logger = require("../../../config/winston");
 
 const {
@@ -18,17 +19,25 @@ const oauth = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_
 oauth.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const readFile = promisify(fs.readFile);
-const templatePath = path.join(__dirname, "../../../public/email.html");
-const mails = [];
 
-const sendGrouptMail = async () => {
+const sendGrouptMail = async (template, prevGameDate) => {
+  const templatePath = path.join(__dirname, `../public/${template}.html`);
+  let mails;
+
   try {
     logger.info("Start: send mail");
 
-    const users = await User.find().lean();
-
-    for (let i = 0; i < users.length; i += 1) {
-      mails.push(users[i].email);
+    if (prevGameDate) {
+      const bettingData = await UserBettingData
+        .find({ gameDate: prevGameDate }, "user")
+        .populate({
+          path: "user",
+          select: "email",
+        }).lean();
+      mails = bettingData.map((data) => (data.user.email));
+    } else {
+      const users = await User.find().lean();
+      mails = users.map((user) => user.email);
     }
 
     const accessToken = await oauth.getAccessToken();
