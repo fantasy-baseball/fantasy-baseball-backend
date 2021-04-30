@@ -12,14 +12,11 @@ const logger = require("../../../config/winston");
 
 module.exports = async () => {
   try {
-    // const dateString = format(new Date(), "yyyyMMdd");
-    // const yesterdayDateString = format(
-    //   subDays(new Date(), 1),
-    //   "yyyyMMdd"
-    // );
-
-    const dateString = "20210424";
-    const yesterdayDateString = "20210423";
+    const dateString = format(new Date(), "yyyyMMdd");
+    const yesterdayDateString = format(
+      subDays(new Date(), 1),
+      "yyyyMMdd"
+    );
 
     logger.info(`Start: prepare ${dateString} game`);
 
