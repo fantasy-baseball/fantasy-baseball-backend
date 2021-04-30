@@ -2,8 +2,8 @@ const schedule = require("node-schedule-tz");
 
 const preparationTime = new schedule.RecurrenceRule();
 preparationTime.dayOfWeek = [0, new schedule.Range(2, 6)];
-preparationTime.hour = 22;
-preparationTime.minute = 50;
+preparationTime.hour = 23;
+preparationTime.minute = 5;
 preparationTime.second = 0;
 preparationTime.tz = "Asia/Seoul";
 
