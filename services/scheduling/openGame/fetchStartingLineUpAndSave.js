@@ -7,14 +7,12 @@ const fetchPlayerEntry = require("../../fetchGameInfoFromKBO/fetchPlayerEntry");
 const fetchPlayersInfo = require("../../fetchGameInfoFromKBO/fetchPlayersInfo");
 const logger = require("../../../config/winston");
 
-module.exports = async () => {
+module.exports = async (dateString) => {
   logger.info("Start: fetch starting line up and save");
 
   const session = await startSession();
 
   try {
-    const dateString = format(new Date(), "yyyyMMdd");
-
     const currentGame = await Game
       .findOne(
         { gameDate: dateString },
