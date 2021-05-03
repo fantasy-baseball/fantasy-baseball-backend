@@ -1,5 +1,5 @@
 const { startSession } = require("mongoose");
-const { format, subDays } = require("date-fns");
+const { format, subDays, getDay } = require("date-fns");
 const fetchGameScheduleAndSave = require("./fetchGameScheduleAndSave");
 const fetchGameResultAndSave = require("./fetchGameResultAndSave");
 const updateHitterScore = require("./updateHitterScore");
@@ -19,8 +19,6 @@ module.exports = async () => {
     );
 
     logger.info(`Start: prepare ${dateString} game`);
-
-    await fetchGameScheduleAndSave(dateString);
 
     const isFetchGameResultComplete = await fetchGameResultAndSave(yesterdayDateString);
     if (!isFetchGameResultComplete) {
@@ -42,6 +40,10 @@ module.exports = async () => {
       await updateUserRankings(yesterdayDateString, updateUserSession);
     });
     updateUserSession.endSession();
+
+    if (getDay(new Date()) !== 1) {
+      await fetchGameScheduleAndSave(dateString);
+    }
 
     logger.info("End: prepare game");
   } catch (err) {
