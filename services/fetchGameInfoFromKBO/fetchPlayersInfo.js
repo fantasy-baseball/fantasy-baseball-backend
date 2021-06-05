@@ -27,6 +27,7 @@ const fetchPlayersInfo = async (players) => {
       for (let j = 0; j < $rows.length; j += 1) {
         const $row = $rows[j];
 
+        const url = $row.children[1].children[0].href;
         const backNumber = $row.children[0].textContent.trim();
         const name = $row.children[1].textContent.trim();
         const team = $row.children[2].textContent.trim();
@@ -37,8 +38,10 @@ const fetchPlayersInfo = async (players) => {
             && toBeMatchedPlayer.team === team
         );
 
-        if (isMatched) {
-          return $row.children[1].children[0].href;
+        const isFuturesLeaguePlayer = /Futures/.test(url);
+
+        if (isMatched && !isFuturesLeaguePlayer) {
+          return url;
         }
       }
 
