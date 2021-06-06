@@ -20,7 +20,10 @@ exports.login = async (req, res, next) => {
       isNewUser = true;
     }
 
-    res.cookie("access_token", googleToken);
+    res.cookie("access_token", googleToken, {
+      sameSite: "none",
+      secure: true,
+    });
 
     res.status(200).json({
       result: "ok",
