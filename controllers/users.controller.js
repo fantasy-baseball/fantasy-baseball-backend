@@ -21,6 +21,7 @@ exports.login = async (req, res, next) => {
     }
 
     res.cookie("access_token", googleToken, {
+      domain: process.env.DOMAIN,
       sameSite: "none",
       secure: true,
     });
