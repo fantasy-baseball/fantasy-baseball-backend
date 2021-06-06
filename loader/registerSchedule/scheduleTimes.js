@@ -44,7 +44,7 @@ exports.saturdayGameCloseTime = saturdayGameCloseTime;
 
 const sundayGameOpenTime = new schedule.RecurrenceRule();
 sundayGameOpenTime.dayOfWeek = [0];
-sundayGameOpenTime.hour = 13;
+sundayGameOpenTime.hour = 16;
 sundayGameOpenTime.minute = 45;
 sundayGameOpenTime.tz = "Asia/Seoul";
 
@@ -52,7 +52,7 @@ exports.sundayGameOpenTime = sundayGameOpenTime;
 
 const sundayGameCloseTime = new schedule.RecurrenceRule();
 sundayGameCloseTime.dayOfWeek = [0];
-sundayGameCloseTime.hour = 15;
+sundayGameCloseTime.hour = 18;
 sundayGameCloseTime.minute = 0;
 sundayGameCloseTime.tz = "Asia/Seoul";
 
