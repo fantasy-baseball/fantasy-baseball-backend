@@ -1,13 +1,13 @@
 module.exports.GAME_START_TIME = {
   weekdays: "18:30:00",
   saturday: "17:00:00",
-  sunday: "14:00:00",
+  sunday: "17:00:00",
 };
 
 module.exports.BETTING_END_TIME = {
   weekdays: "19:30:00",
   saturday: "18:00:00",
-  sunday: "15:00:00",
+  sunday: "18:00:00",
 };
 
 module.exports.PLAYER_POSITION = {
