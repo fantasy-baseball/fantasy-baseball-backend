@@ -6,7 +6,13 @@ module.exports = async (dateString) => {
   try {
     logger.info("Start: fetch game schedule and save");
 
-    const gameList = await fetchGameSchedule(dateString);
+    let gameList = await fetchGameSchedule(dateString);
+    gameList = gameList.filter((game) => {
+      const { gameId } = game;
+
+      return gameId[gameId.length - 1] !== "1";
+    });
+
     logger.info(
       `Log: fetch ${dateString} game schedule, game: ${gameList.length}`
     );
